@@ -8,7 +8,11 @@
     "scheme": "kartnet",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.ynovwebmobile.kartnet",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -37,6 +41,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "owner": "ynov-webmobile",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ed65d9c6-638f-47e3-88ec-0e9a00362be2"
+      }
     }
   }
 }
