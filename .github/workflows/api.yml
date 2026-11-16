@@ -1,0 +1,54 @@
+# Vérification automatique de l'API à chaque push sur main et à chaque Pull Request
+# qui touche au dossier api/. Une PR dont ce workflow est rouge ne doit pas être mergée.
+name: API
+
+on:
+  push:
+    branches: [main]
+    paths: ["api/**", ".github/workflows/api.yml"]
+  pull_request:
+    paths: ["api/**", ".github/workflows/api.yml"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+
+    # Une base PostgreSQL jetable, avec les mêmes identifiants que .env.test
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: kartnet
+          POSTGRES_PASSWORD: kartnet
+          POSTGRES_DB: kartnet_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kartnet"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Vérifier les types
+        run: npm run typecheck
+
+      - name: Lancer les tests
+        run: npm test
+
+      - name: Compiler
+        run: npm run build

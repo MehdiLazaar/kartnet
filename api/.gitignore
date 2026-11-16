@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+
+# Secrets
+.env
+
+# Client Prisma généré (recréé par npm install / npm run db:generate)
+src/generated/
+
+# Photos envoyées par les utilisateurs
+uploads/*
+!uploads/.gitkeep
+.uploads-test/

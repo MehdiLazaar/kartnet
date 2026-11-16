@@ -1,0 +1,110 @@
+# Requêtes prêtes à l'emploi pour tester l'API à la main.
+# Dans VS Code : installer l'extension « REST Client » (humao.rest-client),
+# puis cliquer sur « Send Request » au-dessus de chaque requête.
+# Pré-requis : npm run dev, et npm run db:seed pour le compte démo.
+
+@base = http://localhost:3000/api/v1
+
+### L'API répond-elle ?
+GET {{base}}/health
+
+### Se connecter avec le compte démo
+# @name login
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "demo@kartnet.app", "password": "kartnet123" }
+
+### (le token de la requête précédente est réutilisé automatiquement)
+@token = {{login.response.body.token}}
+
+### Qui suis-je ?
+GET {{base}}/auth/me
+Authorization: Bearer {{token}}
+
+### Mes voyages
+# @name trips
+GET {{base}}/trips
+Authorization: Bearer {{token}}
+
+### Le premier voyage, complet (étapes, souvenirs, trajet)
+GET {{base}}/trips/{{trips.response.body.$[0].id}}
+Authorization: Bearer {{token}}
+
+### Créer (ou modifier) un voyage — l'id est un UUID choisi par l'app
+PUT {{base}}/trips/0b6c3a4e-6f1d-4c2b-9a8e-1f2e3d4c5b6a
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Week-end à Lyon",
+  "startDate": "2026-09-12",
+  "endDate": "2026-09-14",
+  "updatedAt": "{{$datetime iso8601}}"
+}
+
+### Ajouter une étape à ce voyage
+PUT {{base}}/steps/7d1f2c3b-4a5e-4f6a-8b9c-0d1e2f3a4b5c
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "tripId": "0b6c3a4e-6f1d-4c2b-9a8e-1f2e3d4c5b6a",
+  "city": "Lyon",
+  "country": "France",
+  "note": "Traboules du Vieux-Lyon",
+  "order": 0,
+  "updatedAt": "{{$datetime iso8601}}"
+}
+
+### Ajouter un souvenir avec une photo (remplace le chemin du fichier par une vraie image)
+POST {{base}}/memories
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=kartnet
+
+--kartnet
+Content-Disposition: form-data; name="id"
+
+3e4f5a6b-7c8d-4e9f-a0b1-c2d3e4f5a6b7
+--kartnet
+Content-Disposition: form-data; name="tripId"
+
+0b6c3a4e-6f1d-4c2b-9a8e-1f2e3d4c5b6a
+--kartnet
+Content-Disposition: form-data; name="stepId"
+
+7d1f2c3b-4a5e-4f6a-8b9c-0d1e2f3a4b5c
+--kartnet
+Content-Disposition: form-data; name="latitude"
+
+45.7623
+--kartnet
+Content-Disposition: form-data; name="longitude"
+
+4.8270
+--kartnet
+Content-Disposition: form-data; name="takenAt"
+
+2026-09-12T15:30:00.000Z
+--kartnet
+Content-Disposition: form-data; name="note"
+
+Vue depuis Fourvière
+--kartnet
+Content-Disposition: form-data; name="updatedAt"
+
+{{$datetime iso8601}}
+--kartnet
+Content-Disposition: form-data; name="photo"; filename="lyon.jpg"
+Content-Type: image/jpeg
+
+< ./chemin/vers/une/photo.jpg
+--kartnet--
+
+### Ce qui a changé depuis une date (synchronisation)
+GET {{base}}/sync?since=2026-01-01T00:00:00.000Z
+Authorization: Bearer {{token}}
+
+### Supprimer le voyage de test
+DELETE {{base}}/trips/0b6c3a4e-6f1d-4c2b-9a8e-1f2e3d4c5b6a
+Authorization: Bearer {{token}}

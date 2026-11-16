@@ -1,0 +1,45 @@
+# Services de développement de Kartnet.
+#
+#   docker compose up -d db                → lance seulement PostgreSQL (le cas courant)
+#   docker compose --profile full up -d    → lance PostgreSQL + l'API dans Docker
+#
+# Deux bases sont créées : « kartnet » (développement) et « kartnet_test » (tests automatiques).
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: kartnet-db
+    environment:
+      POSTGRES_USER: kartnet
+      POSTGRES_PASSWORD: kartnet
+      POSTGRES_DB: kartnet
+    ports:
+      - "5432:5432"
+    volumes:
+      - kartnet-db-data:/var/lib/postgresql/data
+      - ./api/docker/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kartnet -d kartnet"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    profiles: ["full"]
+    build: ./api
+    container_name: kartnet-api
+    env_file: ./api/.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://kartnet:kartnet@db:5432/kartnet?schema=public
+    ports:
+      - "3000:3000"
+    volumes:
+      - kartnet-uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  kartnet-db-data:
+  kartnet-uploads:

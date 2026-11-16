@@ -1,0 +1,89 @@
+// Schéma de la base PostgreSQL de Kartnet.
+// Il reprend les 4 tables du document d'architecture : User, Trip, Step, Memory.
+//
+// Règles de synchronisation (voir README) :
+// - les id de Trip, Step et Memory sont des UUID créés par le téléphone ;
+// - updatedAt est l'heure de la modification sur le téléphone (sert à résoudre les conflits) ;
+// - serverUpdatedAt est l'heure où le serveur a enregistré la ligne (sert à GET /sync) ;
+// - deletedAt rempli = suppression « douce », pour pouvoir la transmettre aux autres appareils.
+
+generator client {
+  provider                = "prisma-client"
+  output                  = "../src/generated/prisma"
+  moduleFormat            = "esm"
+  // Imports en « .js » : obligatoire pour que le code compilé (dist/) tourne avec Node.
+  generatedFileExtension  = "ts"
+  importFileExtension     = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  trips Trip[]
+}
+
+model Trip {
+  id              String    @id @db.Uuid
+  userId          String    @db.Uuid
+  name            String
+  startDate       DateTime  @db.Date
+  endDate         DateTime? @db.Date
+  coverUrl        String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime
+  deletedAt       DateTime?
+  serverUpdatedAt DateTime  @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  steps    Step[]
+  memories Memory[]
+
+  @@index([userId, serverUpdatedAt])
+}
+
+model Step {
+  id              String    @id @db.Uuid
+  tripId          String    @db.Uuid
+  city            String
+  country         String?
+  note            String?
+  order           Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime
+  deletedAt       DateTime?
+  serverUpdatedAt DateTime  @updatedAt
+
+  trip     Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  memories Memory[]
+
+  @@index([tripId])
+}
+
+model Memory {
+  id              String    @id @db.Uuid
+  tripId          String    @db.Uuid
+  stepId          String?   @db.Uuid
+  photoUrl        String?
+  photoKey        String?
+  latitude        Float
+  longitude       Float
+  takenAt         DateTime
+  note            String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime
+  deletedAt       DateTime?
+  serverUpdatedAt DateTime  @updatedAt
+
+  trip Trip  @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  step Step? @relation(fields: [stepId], references: [id], onDelete: SetNull)
+
+  @@index([tripId, takenAt])
+  @@index([stepId])
+}
