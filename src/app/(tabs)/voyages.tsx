@@ -1,0 +1,49 @@
+import { Link } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+import { Ecran, EnteteEcran, TitreEcran, CarteVoyage } from '@/components/interface-kartnet';
+import { CouleursMarque as C } from '@/constants/identite-visuelle';
+import { Textes } from '@/constants/textes';
+import { useVoyages } from '@/features/voyages/contexte-voyages';
+
+export default function EcranVoyages() {
+  const { trips } = useVoyages();
+
+  return (
+    <Ecran>
+      <EnteteEcran action={
+        <Link href="/creer-voyage" asChild>
+          <Pressable accessibilityRole="button" accessibilityLabel={Textes.voyages.libelleAccessibiliteCreer} style={styles.addButton}>
+            <Text style={styles.addText}>＋</Text>
+          </Pressable>
+        </Link>
+      } />
+      <TitreEcran eyebrow={Textes.voyages.surtitre} title={Textes.voyages.titre} subtitle={Textes.voyages.sousTitre} />
+      <View style={styles.summary}>
+        <Text style={styles.summaryNumber}>{trips.length}</Text>
+        <Text style={styles.summaryLabel}>{trips.length > 1 ? Textes.voyages.voyagesPluriel : Textes.voyages.voyageSingulier}</Text>
+        <View style={styles.summaryDot} />
+        <Text style={styles.summaryLabel}>{trips.reduce((sum, trip) => sum + trip.photoCount, 0)} {Textes.voyages.nombrePhotos}</Text>
+      </View>
+      {trips.map((trip) => <CarteVoyage key={trip.id} trip={trip} />)}
+      {trips.length === 0 ? <Text style={styles.empty}>{Textes.voyages.texteListeVide}</Text> : null}
+      <Link href="/creer-voyage" asChild>
+        <Pressable accessibilityRole="button" style={styles.createLink}>
+          <Text style={styles.createLinkText}>＋  {Textes.voyages.boutonCreer}</Text>
+        </Pressable>
+      </Link>
+    </Ecran>
+  );
+}
+
+const styles = StyleSheet.create({
+  addButton: { width: 36, height: 36, borderRadius: 13, backgroundColor: C.coral, alignItems: 'center', justifyContent: 'center' },
+  addText: { color: C.paper, fontSize: 23, lineHeight: 25 },
+  summary: { flexDirection: 'row', alignItems: 'center', marginBottom: 14, gap: 8 },
+  summaryNumber: { color: C.ink, fontSize: 14, fontWeight: '800' },
+  summaryLabel: { color: C.muted, fontSize: 12 },
+  summaryDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: C.sand, marginHorizontal: 2 },
+  empty: { color: C.muted, textAlign: 'center', paddingVertical: 30 },
+  createLink: { minHeight: 50, borderRadius: 15, borderWidth: 1, borderStyle: 'dashed', borderColor: C.coral, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
+  createLinkText: { color: C.coral, fontSize: 14, fontWeight: '700' },
+});
