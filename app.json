@@ -36,7 +36,31 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Kartnet utilise l'appareil photo pour créer les souvenirs de vos voyages.",
+          "microphonePermission": "Kartnet utilise le micro uniquement si vous filmez une vidéo.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Kartnet utilise l'appareil photo pour créer les souvenirs de vos voyages.",
+          "photosPermission": "Kartnet accède à vos photos pour les ajouter à vos voyages.",
+          "microphonePermission": "Kartnet utilise le micro uniquement si vous filmez une vidéo."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Kartnet utilise votre position pour placer vos souvenirs sur la carte.",
+          "locationAlwaysAndWhenInUsePermission": "Kartnet utilise votre position pour placer vos souvenirs sur la carte.",
+          "motionUsagePermission": "Kartnet n'utilise pas les capteurs de mouvement."        }
+      ],
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,
