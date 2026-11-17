@@ -6,12 +6,21 @@ export type Voyage = {
   destination: string;
   dateLabel: string;
   photoCount: number;
+  souvenirs: SouvenirVoyage[];
+};
+
+export type SouvenirVoyage = {
+  id: string;
+  cheminPhoto: string;
+  datePrise: string;
+  position: { latitude: number; longitude: number } | null;
 };
 
 type ContexteVoyagesValue = {
   trips: Voyage[];
   creerVoyage: (title: string, destination: string) => Voyage;
   obtenirVoyage: (id: string) => Voyage | undefined;
+  ajouterSouvenir: (idVoyage: string, souvenir: SouvenirVoyage) => void;
 };
 
 const ContexteVoyages = createContext<ContexteVoyagesValue | null>(null);
@@ -26,13 +35,28 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
       destination: destination.trim() || 'Destination à préciser',
       dateLabel: 'Aujourd’hui',
       photoCount: 0,
+      souvenirs: [],
     };
     setVoyages((current) => [trip, ...current]);
     return trip;
   }, []);
 
   const obtenirVoyage = useCallback((id: string) => trips.find((trip) => trip.id === id), [trips]);
-  const value = useMemo(() => ({ trips, creerVoyage, obtenirVoyage }), [trips, creerVoyage, obtenirVoyage]);
+  const ajouterSouvenir = useCallback((idVoyage: string, souvenir: SouvenirVoyage) => {
+    setVoyages((voyagesActuels) => voyagesActuels.map((voyage) =>
+      voyage.id === idVoyage
+        ? {
+            ...voyage,
+            souvenirs: [...voyage.souvenirs, souvenir],
+            photoCount: voyage.photoCount + 1,
+          }
+        : voyage,
+    ));
+  }, []);
+  const value = useMemo(
+    () => ({ trips, creerVoyage, obtenirVoyage, ajouterSouvenir }),
+    [trips, creerVoyage, obtenirVoyage, ajouterSouvenir],
+  );
 
   return <ContexteVoyages.Provider value={value}>{children}</ContexteVoyages.Provider>;
 }

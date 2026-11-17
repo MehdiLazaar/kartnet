@@ -15,8 +15,13 @@ export default function EcranAjoutPhotos() {
     Alert.alert(Textes.photos.titreGalerieIndisponible, Textes.photos.texteSelectionIndisponible);
   }
 
-  function afficherCameraIndisponible() {
-    Alert.alert(Textes.photos.titreCameraIndisponible, Textes.photos.texteCameraIndisponible);
+  function ouvrirAppareilPhoto() {
+    if (!trip) {
+      Alert.alert(Textes.voyage.introuvable, Textes.voyage.retourListe);
+      return;
+    }
+
+    router.push({ pathname: '/appareil-photo/[id]' as never, params: { id: trip.id } });
   }
 
   return (
@@ -36,7 +41,7 @@ export default function EcranAjoutPhotos() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={Textes.photos.boutonCamera}
-          onPress={afficherCameraIndisponible}
+          onPress={ouvrirAppareilPhoto}
           style={({ pressed }) => [styles.actionCard, styles.cameraCard, pressed && styles.pressed]}>
           <View style={styles.iconCircle}><View style={styles.cameraIcon}><View style={styles.cameraTop} /><View style={styles.cameraLens} /></View></View>
           <Text style={styles.pickerTitle}>{Textes.photos.boutonCamera}</Text>
