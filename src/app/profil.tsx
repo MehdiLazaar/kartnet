@@ -30,7 +30,7 @@ export default function EcranProfil() {
           <Pressable accessibilityRole="button" style={styles.menuRow}><Text style={styles.menuIcon}>⌖</Text><Text style={styles.menuText}>{Textes.profil.confidentialite}</Text><Text style={styles.menuArrow}>›</Text></Pressable>
         </Link>
         <Link href="/parametres?section=about" asChild>
-          <Pressable accessibilityRole="button" style={[styles.menuRow, styles.lastRow]}><Text style={styles.menuIcon}>♡</Text><Text style={styles.menuText}>{Textes.profil.aPropos}</Text><Text style={styles.menuArrow}>›</Text></Pressable>
+          <Pressable accessibilityRole="button" style={styleDerniereLigneMenu}><Text style={styles.menuIcon}>♡</Text><Text style={styles.menuText}>{Textes.profil.aPropos}</Text><Text style={styles.menuArrow}>›</Text></Pressable>
         </Link>
       </View>
       <Text style={styles.version}>{Textes.profil.version}</Text>
@@ -58,3 +58,5 @@ const styles = StyleSheet.create({
   menuArrow: { color: C.muted, fontSize: 21 },
   version: { color: C.muted, fontSize: 10, textAlign: 'center', marginTop: 22 },
 });
+
+const styleDerniereLigneMenu = StyleSheet.flatten([styles.menuRow, styles.lastRow]);
