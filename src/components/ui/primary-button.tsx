@@ -1,7 +1,6 @@
-import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { CouleursMarque as C } from '@/constants/identite-visuelle';
 
 type PrimaryButtonProps = {
   label: string;
@@ -9,16 +8,22 @@ type PrimaryButtonProps = {
   loading?: boolean; // affiche un indicateur et désactive le bouton
 };
 
+// Bouton principal corail, dans le même style que BoutonPrincipal (interface-kartnet).
 export function PrimaryButton({ label, onPress, loading = false }: Readonly<PrimaryButtonProps>) {
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled: loading, busy: loading }}
       onPress={onPress}
       disabled={loading}
       style={({ pressed }) => [styles.button, (pressed || loading) && styles.pressed]}>
       {loading ? (
-        <ActivityIndicator color="#FFFFFF" />
+        <ActivityIndicator color={C.paper} />
       ) : (
-        <ThemedText style={styles.label}>{label}</ThemedText>
+        <>
+          <Text style={styles.label}>{label}</Text>
+          <Text style={styles.arrow}>→</Text>
+        </>
       )}
     </Pressable>
   );
@@ -26,16 +31,20 @@ export function PrimaryButton({ label, onPress, loading = false }: Readonly<Prim
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#1F5F8B',
-    paddingVertical: Spacing.three,
-    borderRadius: Spacing.three,
+    minHeight: 54,
+    paddingHorizontal: 17,
+    borderRadius: 16,
+    backgroundColor: C.coral,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: C.coral,
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
   },
-  pressed: {
-    opacity: 0.7,
-  },
-  label: {
-    color: '#FFFFFF',
-    fontWeight: 700,
-  },
+  pressed: { opacity: 0.8, transform: [{ scale: 0.99 }] },
+  label: { color: C.paper, fontSize: 15, fontWeight: '700' },
+  arrow: { color: C.paper, fontSize: 21, fontWeight: '600' },
 });
