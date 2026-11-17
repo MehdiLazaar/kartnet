@@ -6,14 +6,13 @@ import {
   TabTriggerSlotProps,
   TabListProps,
 } from 'expo-router/ui';
-import { SymbolView } from 'expo-symbols';
-import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
+import { Alert, Pressable, View, StyleSheet } from 'react-native';
 
-import { ExternalLink } from './external-link';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
-import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { logOut } from '@/repositories/authRepository';
 
 export default function AppTabs() {
   return (
@@ -48,8 +47,13 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
 }
 
 export function CustomTabList(props: TabListProps) {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  async function handleLogout() {
+    try {
+      await logOut();
+    } catch {
+      Alert.alert('Déconnexion impossible', 'Réessaie dans un instant.');
+    }
+  }
 
   return (
     <View {...props} style={styles.tabListContainer}>
@@ -60,16 +64,13 @@ export function CustomTabList(props: TabListProps) {
 
         {props.children}
 
-        <ExternalLink href="https://docs.expo.dev" asChild>
-          <Pressable style={styles.externalPressable}>
-            <ThemedText type="link">Docs</ThemedText>
-            <SymbolView
-              tintColor={colors.text}
-              name={{ ios: 'arrow.up.right.square', web: 'link' }}
-              size={12}
-            />
-          </Pressable>
-        </ExternalLink>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Se déconnecter"
+          onPress={() => void handleLogout()}
+          style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}>
+          <ThemedText type="link">Se déconnecter</ThemedText>
+        </Pressable>
       </ThemedView>
     </View>
   );
@@ -105,11 +106,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     borderRadius: Spacing.three,
   },
-  externalPressable: {
-    flexDirection: 'row',
+  logoutButton: {
     justifyContent: 'center',
     alignItems: 'center',
-    gap: Spacing.one,
     marginLeft: Spacing.three,
+    paddingVertical: Spacing.one,
   },
 });
