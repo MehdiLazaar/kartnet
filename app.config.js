@@ -23,4 +23,8 @@ module.exports = ({ config }) => {
     ios: { ...config.ios, bundleIdentifier: bundleIdentifier },
     android: { ...config.android, package: androidPackage },
   };
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> origin/main

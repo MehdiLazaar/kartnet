@@ -42,6 +42,7 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
+    "owner": "ynov-webmobile",
     "extra": {
       "router": {},
       "eas": {
