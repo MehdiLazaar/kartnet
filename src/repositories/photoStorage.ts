@@ -5,11 +5,14 @@ import { Directory, File, Paths } from 'expo-file-system';
 const MEMORIES_DIR = 'memories';
 
 // Copie la photo temporaire (donnée par la caméra ou la galerie) dans l'app.
-// Renvoie le chemin RELATIF à stocker dans Firestore, ex. "memories/abc.jpg".
+// Renvoie le chemin RELATIF à associer aux données du souvenir, ex. "memories/abc.jpg".
+// Ce chemin pointe vers un fichier local à l'appareil et ne transfère pas la photo.
 export async function savePhoto(tempUri: string, memoryId: string): Promise<string> {
   const folder = new Directory(Paths.document, MEMORIES_DIR);
+  // Le dossier Documents est conservé par le système, contrairement au cache caméra.
   folder.create({ idempotent: true, intermediates: true }); // ne plante pas si le dossier existe déjà
 
+  // On garde l'extension de l'image source pour que le fichier reste lisible.
   const extension = tempUri.split('.').pop()?.toLowerCase() || 'jpg';
   const fileName = `${memoryId}.${extension}`;
   await new File(tempUri).copy(new File(folder, fileName));
@@ -19,6 +22,7 @@ export async function savePhoto(tempUri: string, memoryId: string): Promise<stri
 
 // Reconstruit l'URI complète au moment de l'affichage (<Image source={{ uri }} />).
 export function getPhotoUri(relativePath: string): string {
+  // Le carnet stocke un chemin relatif ; on le convertit en URI complète pour l'affichage.
   return new File(Paths.document, ...relativePath.split('/')).uri;
 }
 

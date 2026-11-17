@@ -18,25 +18,32 @@ import { useVoyages } from "@/features/voyages/contexte-voyages";
 import { savePhoto } from "@/repositories/photoStorage";
 
 export default function EcranAppareilPhoto() {
+  // L'identifiant transmis dans l'URL permet de rattacher le souvenir au bon voyage.
   const { id } = useLocalSearchParams<{ id: string }>();
   const { ajouterSouvenir, obtenirVoyage } = useVoyages();
   const voyage = obtenirVoyage(id);
+
+  // La référence donne accès à la caméra native pour déclencher la prise de vue.
   const cameraRef = useRef<CameraView>(null);
   const [autorisation, demanderAutorisation] = useCameraPermissions();
   const [cameraPrete, definirCameraPrete] = useState(false);
   const [priseEnCours, definirPriseEnCours] = useState(false);
 
   async function prendrePhoto() {
+    // On attend la fin du chargement de l'aperçu et on bloque les doubles pressions.
     if (!cameraPrete || !cameraRef.current || !voyage || priseEnCours) return;
 
     definirPriseEnCours(true);
     try {
+      // La caméra renvoie d'abord un fichier temporaire dans le cache de l'application.
       const photo = await cameraRef.current.takePictureAsync({ quality: 0.9 });
       const datePrise = new Date().toISOString();
       const position = await obtenirPositionActuelle();
       const idSouvenir = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      // On copie le fichier temporaire dans Documents avant de conserver son chemin.
       const cheminPhoto = await savePhoto(photo.uri, idSouvenir);
 
+      // Le contexte met à jour le carnet et son compteur de photos.
       ajouterSouvenir(voyage.id, {
         id: idSouvenir,
         cheminPhoto,
@@ -46,6 +53,7 @@ export default function EcranAppareilPhoto() {
 
       router.replace({ pathname: "/voyage/[id]", params: { id: voyage.id } });
     } catch {
+      // La capture, la copie ou l'accès à la caméra peut échouer sur l'appareil.
       Alert.alert(Textes.camera.titre, Textes.camera.erreurCapture);
     } finally {
       definirPriseEnCours(false);
@@ -70,6 +78,7 @@ export default function EcranAppareilPhoto() {
     );
   }
 
+  // Le hook charge d'abord l'état de permission avant qu'on puisse l'afficher.
   if (!autorisation) {
     return (
       <View style={styles.ecranChargement}>
@@ -78,6 +87,7 @@ export default function EcranAppareilPhoto() {
     );
   }
 
+  // L'aperçu reste masqué tant que l'utilisateur n'a pas autorisé la caméra.
   if (!autorisation.granted) {
     return (
       <SafeAreaView style={styles.ecranAutorisation} edges={["top", "bottom"]}>
@@ -109,6 +119,7 @@ export default function EcranAppareilPhoto() {
 
   return (
     <View style={styles.ecranCamera}>
+      {/* Le déclencheur reste désactivé jusqu'à ce que l'aperçu soit prêt. */}
       <CameraView
         ref={cameraRef}
         facing="back"
@@ -168,6 +179,7 @@ async function obtenirPositionActuelle(): Promise<{
   longitude: number;
 } | null> {
   try {
+    // La localisation est facultative : la photo est conservée même sans autorisation GPS.
     const autorisation = await Location.requestForegroundPermissionsAsync();
     if (!autorisation.granted) return null;
 

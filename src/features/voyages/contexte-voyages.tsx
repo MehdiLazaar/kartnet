@@ -26,6 +26,8 @@ type ContexteVoyagesValue = {
 const ContexteVoyages = createContext<ContexteVoyagesValue | null>(null);
 
 export function FournisseurVoyages({ children }: PropsWithChildren) {
+  // Les voyages et leurs souvenirs sont partagés entre les écrans pendant la session.
+  // Cette version du contexte est en mémoire ; elle ne les restaure pas après fermeture.
   const [trips, setVoyages] = useState<Voyage[]>([]);
 
   const creerVoyage = useCallback((title: string, destination: string) => {
@@ -43,6 +45,7 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
 
   const obtenirVoyage = useCallback((id: string) => trips.find((trip) => trip.id === id), [trips]);
   const ajouterSouvenir = useCallback((idVoyage: string, souvenir: SouvenirVoyage) => {
+    // Ajoute le souvenir au voyage et met à jour le compteur affiché dans le carnet.
     setVoyages((voyagesActuels) => voyagesActuels.map((voyage) =>
       voyage.id === idVoyage
         ? {
