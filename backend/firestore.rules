@@ -1,0 +1,165 @@
+rules_version = '2';
+
+// =============================================================================
+// Kartnet — règles de sécurité Firestore
+//
+// Ces règles SONT le backend : l'app parle directement à Firestore, donc tout
+// ce qui n'est pas explicitement autorisé ici est refusé.
+//
+// Arborescence des données (voir backend/README.md) :
+//   users/{uid}
+//     trips/{tripId}
+//       steps/{stepId}        une étape = une ville visitée, avec sa note
+//       memories/{memoryId}   un souvenir = une photo géolocalisée, avec sa note
+// =============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Outils communs -------------------------------------------------
+
+    // L'utilisateur connecté est-il le propriétaire de cette branche ?
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Le document tel qu'il sera APRÈS l'écriture.
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Le document tel qu'il est AVANT l'écriture (seulement pour update/delete).
+    function existing() {
+      return resource.data;
+    }
+
+    function isText(value, min, max) {
+      return value is string && value.size() >= min && value.size() <= max;
+    }
+
+    function isOptionalText(value, max) {
+      return value == null || isText(value, 0, max);
+    }
+
+    function isOptionalTimestamp(value) {
+      return value == null || value is timestamp;
+    }
+
+    function isOptionalGeoPoint(value) {
+      return value == null || value is latlng;
+    }
+
+    // createdAt et updatedAt sont toujours écrits avec serverTimestamp() :
+    // l'heure vient du serveur, pas du téléphone (qui peut être faux).
+    function hasCreateTimestamps() {
+      return incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+    }
+
+    // À la mise à jour, createdAt ne bouge pas et updatedAt est rafraîchi.
+    function hasUpdateTimestamps() {
+      return incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time;
+    }
+
+    function tripPath(uid, tripId) {
+      return /databases/$(database)/documents/users/$(uid)/trips/$(tripId);
+    }
+
+    function stepPath(uid, tripId, stepId) {
+      return /databases/$(database)/documents/users/$(uid)/trips/$(tripId)/steps/$(stepId);
+    }
+
+    // ---------- Validation de chaque type de document --------------------------
+
+    function isValidUser() {
+      let d = incoming();
+      return d.keys().hasAll(['displayName', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['displayName', 'createdAt', 'updatedAt'])
+        && isText(d.displayName, 1, 50);
+    }
+
+    function isValidTrip() {
+      let d = incoming();
+      let endDate = d.get('endDate', null);
+      return d.keys().hasAll(['title', 'startDate', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly([
+          'title', 'description', 'startDate', 'endDate', 'coverMemoryId',
+          'createdAt', 'updatedAt'
+        ])
+        && isText(d.title, 1, 80)
+        && isOptionalText(d.get('description', null), 2000)
+        && d.startDate is timestamp
+        && isOptionalTimestamp(endDate)
+        && (endDate == null || endDate >= d.startDate)
+        && isOptionalText(d.get('coverMemoryId', null), 128);
+    }
+
+    function isValidStep() {
+      let d = incoming();
+      return d.keys().hasAll(['city', 'order', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly([
+          'city', 'country', 'note', 'location', 'order', 'arrivedAt',
+          'createdAt', 'updatedAt'
+        ])
+        && isText(d.city, 1, 100)
+        && isOptionalText(d.get('country', null), 100)
+        && isOptionalText(d.get('note', null), 5000)
+        && isOptionalGeoPoint(d.get('location', null))
+        && d.order is int && d.order >= 0
+        && isOptionalTimestamp(d.get('arrivedAt', null));
+    }
+
+    // stepId est facultatif : un souvenir peut ne pas être rattaché à une étape.
+    // S'il est rempli, l'étape doit exister dans le même voyage.
+    function isValidMemory(uid, tripId) {
+      let d = incoming();
+      let stepId = d.get('stepId', null);
+      return d.keys().hasAll(['localPhotoPath', 'takenAt', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly([
+          'stepId', 'note', 'location', 'placeName', 'takenAt',
+          'localPhotoPath', 'photoStoragePath', 'createdAt', 'updatedAt'
+        ])
+        && isText(d.localPhotoPath, 1, 512)
+        && isOptionalText(d.get('photoStoragePath', null), 512)
+        && isOptionalText(d.get('note', null), 5000)
+        && isOptionalText(d.get('placeName', null), 200)
+        && isOptionalGeoPoint(d.get('location', null))
+        && d.takenAt is timestamp
+        && (stepId == null
+            || (isText(stepId, 1, 128) && existsAfter(stepPath(uid, tripId, stepId))));
+    }
+
+    // ---------- Règles d'accès -------------------------------------------------
+
+    match /users/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create: if isOwner(uid) && isValidUser() && hasCreateTimestamps();
+      allow update: if isOwner(uid) && isValidUser() && hasUpdateTimestamps();
+
+      match /trips/{tripId} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidTrip() && hasCreateTimestamps();
+        allow update: if isOwner(uid) && isValidTrip() && hasUpdateTimestamps();
+
+        // existsAfter : le voyage doit exister après l'écriture. Ça autorise
+        // à créer le voyage et sa première étape dans le même batch.
+        match /steps/{stepId} {
+          allow read, delete: if isOwner(uid);
+          allow create: if isOwner(uid) && isValidStep() && hasCreateTimestamps()
+            && existsAfter(tripPath(uid, tripId));
+          allow update: if isOwner(uid) && isValidStep() && hasUpdateTimestamps();
+        }
+
+        match /memories/{memoryId} {
+          allow read, delete: if isOwner(uid);
+          allow create: if isOwner(uid) && isValidMemory(uid, tripId) && hasCreateTimestamps()
+            && existsAfter(tripPath(uid, tripId));
+          allow update: if isOwner(uid) && isValidMemory(uid, tripId) && hasUpdateTimestamps();
+        }
+      }
+    }
+
+    // Tout autre chemin : aucune règle ne correspond, donc accès refusé.
+  }
+}
