@@ -1,6 +1,14 @@
 /** Textes affichés par l’application, regroupés par écran. */
 export const Textes = {
   nomMarque: 'kartnet',
+  navigation: {
+    accueil: 'Accueil',
+    voyages: 'Voyages',
+    deconnexion: 'Se déconnecter',
+    libelleAccessibiliteDeconnexion: 'Se déconnecter de Kartnet',
+    erreurDeconnexion: 'Déconnexion impossible',
+    messageErreurDeconnexion: 'Réessaie dans un instant.',
+  },
   accueil: {
     libelleAccessibiliteProfil: 'Ouvrir ton profil',
     initialeProfil: '•',

@@ -1,30 +1,31 @@
 import {
-  Tabs,
   TabList,
-  TabTrigger,
-  TabSlot,
-  TabTriggerSlotProps,
   TabListProps,
-} from 'expo-router/ui';
-import { Alert, Pressable, View, StyleSheet } from 'react-native';
+  Tabs,
+  TabSlot,
+  TabTrigger,
+  TabTriggerSlotProps,
+} from "expo-router/ui";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
 
-import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
+import { ThemedText } from "./themed-text";
+import { ThemedView } from "./themed-view";
 
-import { MaxContentWidth, Spacing } from '@/constants/theme';
-import { logOut } from '@/repositories/authRepository';
+import { MaxContentWidth, Spacing } from "@/constants/theme";
+import { Textes } from "@/constants/textes";
+import { logOut } from "@/repositories/authRepository";
 
 export default function AppTabs() {
   return (
     <Tabs>
-      <TabSlot style={{ height: '100%' }} />
+      <TabSlot style={{ height: "100%" }} />
       <TabList asChild>
         <CustomTabList>
           <TabTrigger name="home" href="/" asChild>
-            <TabButton>Accueil</TabButton>
+            <TabButton>{Textes.navigation.accueil}</TabButton>
           </TabTrigger>
           <TabTrigger name="voyages" href="/voyages" asChild>
-            <TabButton>Voyages</TabButton>
+            <TabButton>{Textes.navigation.voyages}</TabButton>
           </TabTrigger>
         </CustomTabList>
       </TabList>
@@ -32,13 +33,23 @@ export default function AppTabs() {
   );
 }
 
-export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
+export function TabButton({
+  children,
+  isFocused,
+  ref,
+  ...props
+}: TabTriggerSlotProps) {
+  void ref;
   return (
     <Pressable {...props} style={({ pressed }) => pressed && styles.pressed}>
       <ThemedView
-        type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
-        style={styles.tabButtonView}>
-        <ThemedText type="small" themeColor={isFocused ? 'text' : 'textSecondary'}>
+        type={isFocused ? "backgroundSelected" : "backgroundElement"}
+        style={styles.tabButtonView}
+      >
+        <ThemedText
+          type="small"
+          themeColor={isFocused ? "text" : "textSecondary"}
+        >
           {children}
         </ThemedText>
       </ThemedView>
@@ -51,25 +62,29 @@ export function CustomTabList(props: TabListProps) {
     try {
       await logOut();
     } catch {
-      Alert.alert('Déconnexion impossible', 'Réessaie dans un instant.');
+      Alert.alert("Déconnexion impossible", "Réessaie dans un instant.");
     }
   }
 
   return (
     <View {...props} style={styles.tabListContainer}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>
-        <ThemedText type="smallBold" style={styles.brandText}>
-          kartnet
+      <ThemedText type="smallBold" style={styles.brandText}>
+          {Textes.nomMarque}
         </ThemedText>
 
         {props.children}
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Se déconnecter"
+          accessibilityLabel={Textes.navigation.libelleAccessibiliteDeconnexion}
           onPress={() => void handleLogout()}
-          style={({ pressed }) => [styles.logoutButton, pressed && styles.pressed]}>
-          <ThemedText type="link">Se déconnecter</ThemedText>
+          style={({ pressed }) => [
+            styles.logoutButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <ThemedText type="link">{Textes.navigation.deconnexion}</ThemedText>
         </Pressable>
       </ThemedView>
     </View>
@@ -78,25 +93,25 @@ export function CustomTabList(props: TabListProps) {
 
 const styles = StyleSheet.create({
   tabListContainer: {
-    position: 'absolute',
-    width: '100%',
+    position: "absolute",
+    width: "100%",
     padding: Spacing.three,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
   },
   innerContainer: {
     paddingVertical: Spacing.two,
     paddingHorizontal: Spacing.five,
     borderRadius: Spacing.five,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flexGrow: 1,
     gap: Spacing.two,
     maxWidth: MaxContentWidth,
   },
   brandText: {
-    marginRight: 'auto',
+    marginRight: "auto",
   },
   pressed: {
     opacity: 0.7,
@@ -107,8 +122,8 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.three,
   },
   logoutButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginLeft: Spacing.three,
     paddingVertical: Spacing.one,
   },

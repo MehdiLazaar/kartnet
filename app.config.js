@@ -20,6 +20,13 @@ module.exports = ({ config }) => {
     ...config,
     name: name,
     scheme: scheme,
+    plugins: [
+      ...(config.plugins ?? []),
+      'expo-font',
+      'expo-image',
+      'expo-status-bar',
+      'expo-web-browser',
+    ],
     ios: { ...config.ios, bundleIdentifier: bundleIdentifier },
     android: { ...config.android, package: androidPackage },
   };
