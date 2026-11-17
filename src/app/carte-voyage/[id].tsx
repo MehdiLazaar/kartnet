@@ -13,7 +13,7 @@ export default function EcranCarteVoyage() {
 
   return (
     <Ecran>
-      <EnteteEcran back={voyage ? `/voyage/${voyage.id}` : '/(tabs)/voyages'} />
+      <EnteteEcran back={voyage ? `/voyage/${voyage.id}` : '/voyages'} />
       <TitreEcran eyebrow={Textes.carte.surtitre} title={Textes.carte.titre} subtitle={voyage?.destination ?? Textes.carte.sousTitre} />
       <View style={styles.emptyMap}>
         <View style={styles.pinCircle}><Text style={styles.pinGlyph}>⌖</Text></View>

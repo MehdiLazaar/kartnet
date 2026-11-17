@@ -1,0 +1,3 @@
+node_modules/
+# Logs écrits par les emulators Firebase
+*-debug.log

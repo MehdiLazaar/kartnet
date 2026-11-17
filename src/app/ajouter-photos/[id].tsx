@@ -21,7 +21,7 @@ export default function EcranAjoutPhotos() {
 
   return (
     <Ecran>
-      <EnteteEcran back={trip ? `/voyage/${trip.id}` : '/(tabs)/voyages'} />
+      <EnteteEcran back={trip ? `/voyage/${trip.id}` : '/voyages'} />
       <TitreEcran eyebrow={Textes.photos.surtitre} title={Textes.photos.titre} subtitle={trip ? `${Textes.photos.phraseAjoutVoyage} « ${trip.title} »` : Textes.photos.sousTitre} />
       <View style={styles.actionsRow}>
         <Pressable

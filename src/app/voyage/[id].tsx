@@ -14,7 +14,7 @@ export default function EcranDetailVoyage() {
   if (!voyage) {
     return (
       <Ecran>
-        <EnteteEcran back="/(tabs)/voyages" />
+        <EnteteEcran back="/voyages" />
         <TitreEcran title={Textes.voyage.introuvable} subtitle={Textes.voyage.retourListe} />
       </Ecran>
     );
@@ -22,7 +22,7 @@ export default function EcranDetailVoyage() {
 
   return (
     <Ecran>
-      <EnteteEcran back="/(tabs)/voyages" />
+      <EnteteEcran back="/voyages" />
       <TitreEcran eyebrow={voyage.destination.toUpperCase()} title={voyage.title} subtitle={`${voyage.dateLabel}  ·  ${voyage.photoCount} ${Textes.voyage.motPhotos}`} />
       <View style={styles.sectionHeader}>
         <View>

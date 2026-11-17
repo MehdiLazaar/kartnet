@@ -1,0 +1,17 @@
+{
+  "name": "kartnet-backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "emulators": "firebase emulators:start --project demo-kartnet",
+    "test": "firebase emulators:exec --only firestore --project demo-kartnet \"vitest run\"",
+    "deploy": "firebase deploy --only firestore"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "firebase": "^13.3.0",
+    "firebase-tools": "^15.36.0",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}

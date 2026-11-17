@@ -24,7 +24,7 @@ export default function EcranCreationVoyage() {
 
   return (
     <Ecran>
-      <EnteteEcran back="/(tabs)/voyages" />
+      <EnteteEcran back="/voyages" />
       <TitreEcran eyebrow={Textes.creerVoyage.surtitre} title={Textes.creerVoyage.titre} subtitle={Textes.creerVoyage.sousTitre} />
       <View style={styles.field}>
         <Text style={styles.label}>{Textes.creerVoyage.libelleNom}</Text>
