@@ -1,5 +1,5 @@
 import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedIcon } from '@/components/animated-icon';
@@ -8,6 +8,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useUser } from '@/hooks/use-auth';
+import { logOut } from '@/repositories/authRepository';
 
 function getDevMenuHint() {
   if (Platform.OS === 'web') {
@@ -29,6 +31,8 @@ function getDevMenuHint() {
 }
 
 export default function HomeScreen() {
+  const user = useUser();
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -54,6 +58,12 @@ export default function HomeScreen() {
             hint={<ThemedText type="code">npm run reset-project</ThemedText>}
           />
         </ThemedView>
+
+        {/* TEST TEMPORAIRE : vérifier la connexion et la déconnexion */}
+        <ThemedText type="small">Connecté : {user.email}</ThemedText>
+        <Pressable onPress={() => logOut()}>
+          <ThemedText type="linkPrimary">Se déconnecter</ThemedText>
+        </Pressable>
 
         {Platform.OS === 'web' && <WebBadge />}
       </SafeAreaView>
