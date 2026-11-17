@@ -1,27 +1,38 @@
-import { StyleSheet, TextInput, type TextInputProps } from 'react-native';
+import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { CouleursMarque as C } from '@/constants/identite-visuelle';
 
-// Champ de saisie aux couleurs du thème (clair / sombre).
-// Accepte toutes les props d'un TextInput classique.
-export function TextField({ style, ...props }: Readonly<TextInputProps>) {
-  const theme = useTheme();
+type TextFieldProps = TextInputProps & {
+  label?: string; // libellé affiché au-dessus du champ
+};
 
+// Champ de saisie aux couleurs de la charte Kartnet.
+// Accepte toutes les props d'un TextInput classique, plus un libellé facultatif.
+export function TextField({ label, style, accessibilityLabel, ...props }: Readonly<TextFieldProps>) {
   return (
-    <TextInput
-      placeholderTextColor={theme.textSecondary}
-      style={[styles.input, { color: theme.text, backgroundColor: theme.backgroundElement }, style]}
-      {...props}
-    />
+    <View style={styles.field}>
+      {label ? <Text style={styles.label}>{label}</Text> : null}
+      <TextInput
+        accessibilityLabel={accessibilityLabel ?? label}
+        placeholderTextColor={C.muted}
+        style={[styles.input, style]}
+        {...props}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  field: { gap: 8 },
+  label: { color: C.ink, fontSize: 13, fontWeight: '700' },
   input: {
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-    borderRadius: Spacing.three,
-    fontSize: 16,
+    minHeight: 54,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: C.line,
+    backgroundColor: C.cream,
+    paddingHorizontal: 15,
+    color: C.ink,
+    fontSize: 15,
   },
 });
