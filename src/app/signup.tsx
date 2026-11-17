@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { router } from 'expo-router';
 
 import { AuthLayout } from '@/components/auth-layout';
 import { FormError } from '@/components/ui/form-error';
@@ -16,7 +17,10 @@ export default function SignupScreen() {
   // Crée le compte (Authentication) ET le profil users/{uid} (Firestore).
   // Le RootNavigator bascule ensuite tout seul vers l'app.
   const { submit, submitting, error, setError } = useFormSubmit(
-    () => signUp(email, password, displayName),
+    async () => {
+      await signUp(email, password, displayName);
+      router.replace('/(app)');
+    },
     authErrorMessage,
   );
 

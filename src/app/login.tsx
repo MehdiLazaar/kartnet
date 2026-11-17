@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { router } from 'expo-router';
 
 import { AuthLayout } from '@/components/auth-layout';
 import { FormError } from '@/components/ui/form-error';
@@ -12,10 +13,11 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Pas de navigation après la connexion : quand `user` change, le RootNavigator
-  // (src/app/_layout.tsx) affiche automatiquement la partie connectée.
   const { submit, submitting, error, setError } = useFormSubmit(
-    () => signIn(email, password),
+    async () => {
+      await signIn(email, password);
+      router.replace('/(app)');
+    },
     authErrorMessage,
   );
 
