@@ -1,5 +1,5 @@
 import type { User } from 'firebase/auth';
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { watchAuth } from '@/repositories/authRepository';
 
@@ -12,7 +12,7 @@ type AuthState = {
 const AuthContext = createContext<AuthState | null>(null);
 
 // 2. Le Provider : à placer UNE fois, tout en haut de l'app (dans src/app/_layout.tsx).
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +26,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, []); // [] = on ne s'abonne qu'une seule fois
 
-  return <AuthContext value={{ user, loading }}>{children}</AuthContext>;
+  // useMemo : on ne recrée l'objet que si user ou loading change.
+  // Sinon, chaque rendu créerait un nouvel objet et re-rendrait tous les écrans qui utilisent useAuth().
+  const value = useMemo(() => ({ user, loading }), [user, loading]);
+
+  return <AuthContext value={value}>{children}</AuthContext>;
 }
 
 // 3. Le hook : n'importe quel écran peut faire `const { user, loading } = useAuth();`

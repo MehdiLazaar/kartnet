@@ -14,7 +14,7 @@ type AuthLayoutProps = {
 };
 
 // Mise en page commune aux écrans de connexion et d'inscription.
-export function AuthLayout({ title, children, footerLink }: AuthLayoutProps) {
+export function AuthLayout({ title, children, footerLink }: Readonly<AuthLayoutProps>) {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>

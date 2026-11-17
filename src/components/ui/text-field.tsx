@@ -5,7 +5,7 @@ import { useTheme } from '@/hooks/use-theme';
 
 // Champ de saisie aux couleurs du thème (clair / sombre).
 // Accepte toutes les props d'un TextInput classique.
-export function TextField({ style, ...props }: TextInputProps) {
+export function TextField({ style, ...props }: Readonly<TextInputProps>) {
   const theme = useTheme();
 
   return (

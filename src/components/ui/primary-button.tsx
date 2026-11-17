@@ -9,7 +9,7 @@ type PrimaryButtonProps = {
   loading?: boolean; // affiche un indicateur et désactive le bouton
 };
 
-export function PrimaryButton({ label, onPress, loading = false }: PrimaryButtonProps) {
+export function PrimaryButton({ label, onPress, loading = false }: Readonly<PrimaryButtonProps>) {
   return (
     <Pressable
       onPress={onPress}

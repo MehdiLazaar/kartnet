@@ -25,7 +25,9 @@ export default function SignupScreen() {
       setError('Remplissez tous les champs.');
       return;
     }
-    submit();
+    // `void` : on lance la promesse sans l'attendre, volontairement.
+    // Les erreurs sont déjà gérées dans useFormSubmit (try / catch).
+    void submit();
   }
 
   return (

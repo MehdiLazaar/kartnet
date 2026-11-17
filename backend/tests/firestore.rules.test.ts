@@ -1,10 +1,5 @@
 import { readFileSync } from 'node:fs';
-import {
-  assertFails,
-  assertSucceeds,
-  initializeTestEnvironment,
-  type RulesTestEnvironment,
-} from '@firebase/rules-unit-testing';
+import { initializeTestEnvironment, type RulesTestEnvironment } from '@firebase/rules-unit-testing';
 import {
   deleteDoc,
   doc,
@@ -17,11 +12,17 @@ import {
   writeBatch,
   type Firestore,
 } from 'firebase/firestore';
-import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 // Ces tests tournent contre l'emulator Firestore (lancé par `npm test`),
 // jamais contre la vraie base.
+//
+// Chaque test vérifie explicitement le résultat :
+//   - autorisé : la promesse se résout   → expect(...).resolves
+//   - refusé   : elle est rejetée avec le code "permission-denied" → expect(...).rejects
 let env: RulesTestEnvironment;
+
+const DENIED = { code: 'permission-denied' };
 
 beforeAll(async () => {
   env = await initializeTestEnvironment({
@@ -88,37 +89,42 @@ async function seed(path: string, data: Record<string, unknown>) {
 }
 
 const aliceTrip = 'users/alice/trips/trip1';
+const seedAliceTrip = () => seed(aliceTrip, { title: 'Japon', startDate: Timestamp.now() });
 
 // ---------- Profil utilisateur -------------------------------------------------
 
 describe('users/{uid}', () => {
   it('un utilisateur peut créer son propre profil', async () => {
-    await assertSucceeds(setDoc(doc(db('alice'), 'users/alice'), { displayName: 'Alice', ...created() }));
+    await expect(
+      setDoc(doc(db('alice'), 'users/alice'), { displayName: 'Alice', ...created() }),
+    ).resolves.toBeUndefined();
   });
 
   it("personne ne peut créer le profil de quelqu'un d'autre", async () => {
-    await assertFails(setDoc(doc(db('bob'), 'users/alice'), { displayName: 'Bob', ...created() }));
+    await expect(
+      setDoc(doc(db('bob'), 'users/alice'), { displayName: 'Bob', ...created() }),
+    ).rejects.toMatchObject(DENIED);
   });
 
   it('un visiteur non connecté ne peut rien lire', async () => {
     await seed('users/alice', { displayName: 'Alice' });
-    await assertFails(getDoc(doc(anonymousDb(), 'users/alice')));
+    await expect(getDoc(doc(anonymousDb(), 'users/alice'))).rejects.toMatchObject(DENIED);
   });
 
   it('un champ inconnu est refusé', async () => {
-    await assertFails(
+    await expect(
       setDoc(doc(db('alice'), 'users/alice'), { displayName: 'Alice', isAdmin: true, ...created() }),
-    );
+    ).rejects.toMatchObject(DENIED);
   });
 
   it("createdAt doit venir du serveur, pas de l'horloge du téléphone", async () => {
-    await assertFails(
+    await expect(
       setDoc(doc(db('alice'), 'users/alice'), {
         displayName: 'Alice',
         createdAt: Timestamp.now(),
         updatedAt: serverTimestamp(),
       }),
-    );
+    ).rejects.toMatchObject(DENIED);
   });
 });
 
@@ -126,38 +132,46 @@ describe('users/{uid}', () => {
 
 describe('trips', () => {
   it('le propriétaire peut créer un voyage valide', async () => {
-    await assertSucceeds(setDoc(doc(db('alice'), aliceTrip), validTrip()));
+    await expect(setDoc(doc(db('alice'), aliceTrip), validTrip())).resolves.toBeUndefined();
   });
 
   it("un autre utilisateur ne peut ni lire ni écrire les voyages d'Alice", async () => {
-    await seed(aliceTrip, { title: 'Japon', startDate: Timestamp.now() });
-    await assertFails(getDoc(doc(db('bob'), aliceTrip)));
-    await assertFails(setDoc(doc(db('bob'), 'users/alice/trips/trip2'), validTrip()));
+    await seedAliceTrip();
+    await expect(getDoc(doc(db('bob'), aliceTrip))).rejects.toMatchObject(DENIED);
+    await expect(
+      setDoc(doc(db('bob'), 'users/alice/trips/trip2'), validTrip()),
+    ).rejects.toMatchObject(DENIED);
   });
 
   it('un titre vide est refusé', async () => {
-    await assertFails(setDoc(doc(db('alice'), aliceTrip), { ...validTrip(), title: '' }));
+    await expect(
+      setDoc(doc(db('alice'), aliceTrip), { ...validTrip(), title: '' }),
+    ).rejects.toMatchObject(DENIED);
   });
 
   it('la date de fin ne peut pas précéder la date de début', async () => {
-    await assertFails(
+    await expect(
       setDoc(doc(db('alice'), aliceTrip), {
         ...validTrip(),
         endDate: Timestamp.fromDate(new Date('2026-03-01')),
       }),
-    );
+    ).rejects.toMatchObject(DENIED);
   });
 
   it('une mise à jour garde createdAt et rafraîchit updatedAt', async () => {
-    await seed(aliceTrip, { title: 'Japon', startDate: Timestamp.now() });
+    await seedAliceTrip();
     const ref = doc(db('alice'), aliceTrip);
-    await assertSucceeds(updateDoc(ref, { title: 'Japon et Corée', updatedAt: serverTimestamp() }));
-    await assertFails(updateDoc(ref, { createdAt: serverTimestamp(), updatedAt: serverTimestamp() }));
+    await expect(
+      updateDoc(ref, { title: 'Japon et Corée', updatedAt: serverTimestamp() }),
+    ).resolves.toBeUndefined();
+    await expect(
+      updateDoc(ref, { createdAt: serverTimestamp(), updatedAt: serverTimestamp() }),
+    ).rejects.toMatchObject(DENIED);
   });
 
   it('le propriétaire peut supprimer son voyage', async () => {
-    await seed(aliceTrip, { title: 'Japon', startDate: Timestamp.now() });
-    await assertSucceeds(deleteDoc(doc(db('alice'), aliceTrip)));
+    await seedAliceTrip();
+    await expect(deleteDoc(doc(db('alice'), aliceTrip))).resolves.toBeUndefined();
   });
 });
 
@@ -165,12 +179,16 @@ describe('trips', () => {
 
 describe('steps', () => {
   it('on peut ajouter une étape à un voyage existant', async () => {
-    await seed(aliceTrip, { title: 'Japon', startDate: Timestamp.now() });
-    await assertSucceeds(setDoc(doc(db('alice'), `${aliceTrip}/steps/s1`), validStep()));
+    await seedAliceTrip();
+    await expect(
+      setDoc(doc(db('alice'), `${aliceTrip}/steps/s1`), validStep()),
+    ).resolves.toBeUndefined();
   });
 
   it("on ne peut pas ajouter d'étape à un voyage qui n'existe pas", async () => {
-    await assertFails(setDoc(doc(db('alice'), `${aliceTrip}/steps/s1`), validStep()));
+    await expect(
+      setDoc(doc(db('alice'), `${aliceTrip}/steps/s1`), validStep()),
+    ).rejects.toMatchObject(DENIED);
   });
 
   it('on peut créer le voyage et sa première étape dans le même batch', async () => {
@@ -178,12 +196,14 @@ describe('steps', () => {
     const batch = writeBatch(aliceDb);
     batch.set(doc(aliceDb, aliceTrip), validTrip());
     batch.set(doc(aliceDb, `${aliceTrip}/steps/s1`), validStep());
-    await assertSucceeds(batch.commit());
+    await expect(batch.commit()).resolves.toBeUndefined();
   });
 
   it("l'ordre doit être un entier positif", async () => {
-    await seed(aliceTrip, { title: 'Japon', startDate: Timestamp.now() });
-    await assertFails(setDoc(doc(db('alice'), `${aliceTrip}/steps/s1`), { ...validStep(), order: -1 }));
+    await seedAliceTrip();
+    await expect(
+      setDoc(doc(db('alice'), `${aliceTrip}/steps/s1`), { ...validStep(), order: -1 }),
+    ).rejects.toMatchObject(DENIED);
   });
 });
 
@@ -191,40 +211,49 @@ describe('steps', () => {
 
 describe('memories', () => {
   it('on peut créer un souvenir sans étape', async () => {
-    await seed(aliceTrip, { title: 'Japon', startDate: Timestamp.now() });
-    await assertSucceeds(setDoc(doc(db('alice'), `${aliceTrip}/memories/m1`), validMemory()));
+    await seedAliceTrip();
+    await expect(
+      setDoc(doc(db('alice'), `${aliceTrip}/memories/m1`), validMemory()),
+    ).resolves.toBeUndefined();
   });
 
   it('on peut rattacher un souvenir à une étape existante', async () => {
-    await seed(aliceTrip, { title: 'Japon', startDate: Timestamp.now() });
+    await seedAliceTrip();
     await seed(`${aliceTrip}/steps/s1`, { city: 'Kyoto', order: 0 });
-    await assertSucceeds(
+    await expect(
       setDoc(doc(db('alice'), `${aliceTrip}/memories/m1`), { ...validMemory(), stepId: 's1' }),
-    );
+    ).resolves.toBeUndefined();
   });
 
   it("stepId ne peut pas pointer vers une étape qui n'existe pas", async () => {
-    await seed(aliceTrip, { title: 'Japon', startDate: Timestamp.now() });
-    await assertFails(
+    await seedAliceTrip();
+    await expect(
       setDoc(doc(db('alice'), `${aliceTrip}/memories/m1`), { ...validMemory(), stepId: 'fantome' }),
-    );
+    ).rejects.toMatchObject(DENIED);
   });
 
   it('la position doit être un GeoPoint', async () => {
-    await seed(aliceTrip, { title: 'Japon', startDate: Timestamp.now() });
-    await assertFails(
-      setDoc(doc(db('alice'), `${aliceTrip}/memories/m1`), { ...validMemory(), location: '35.0, 135.7' }),
-    );
+    await seedAliceTrip();
+    await expect(
+      setDoc(doc(db('alice'), `${aliceTrip}/memories/m1`), {
+        ...validMemory(),
+        location: '35.0, 135.7',
+      }),
+    ).rejects.toMatchObject(DENIED);
   });
 
   it('la photo locale est obligatoire', async () => {
-    await seed(aliceTrip, { title: 'Japon', startDate: Timestamp.now() });
+    await seedAliceTrip();
     const { localPhotoPath: _omitted, ...withoutPhoto } = validMemory();
-    await assertFails(setDoc(doc(db('alice'), `${aliceTrip}/memories/m1`), withoutPhoto));
+    await expect(
+      setDoc(doc(db('alice'), `${aliceTrip}/memories/m1`), withoutPhoto),
+    ).rejects.toMatchObject(DENIED);
   });
 
   it("Bob ne peut pas ajouter de souvenir dans le voyage d'Alice", async () => {
-    await seed(aliceTrip, { title: 'Japon', startDate: Timestamp.now() });
-    await assertFails(setDoc(doc(db('bob'), `${aliceTrip}/memories/m1`), validMemory()));
+    await seedAliceTrip();
+    await expect(
+      setDoc(doc(db('bob'), `${aliceTrip}/memories/m1`), validMemory()),
+    ).rejects.toMatchObject(DENIED);
   });
 });
