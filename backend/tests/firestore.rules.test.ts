@@ -48,6 +48,7 @@ const created = () => ({ createdAt: serverTimestamp(), updatedAt: serverTimestam
 
 const validTrip = () => ({
   title: 'Japon 2026',
+  destination: 'Japon',
   description: 'Deux semaines entre Tokyo et Kyoto',
   startDate: Timestamp.fromDate(new Date('2026-04-01')),
   endDate: Timestamp.fromDate(new Date('2026-04-15')),
@@ -146,6 +147,12 @@ describe('trips', () => {
   it('un titre vide est refusé', async () => {
     await expect(
       setDoc(doc(db('alice'), aliceTrip), { ...validTrip(), title: '' }),
+    ).rejects.toMatchObject(DENIED);
+  });
+
+  it('la destination ne peut pas dépasser 100 caractères', async () => {
+    await expect(
+      setDoc(doc(db('alice'), aliceTrip), { ...validTrip(), destination: 'x'.repeat(101) }),
     ).rejects.toMatchObject(DENIED);
   });
 
