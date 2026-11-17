@@ -1,10 +1,12 @@
 import { Link, router, useLocalSearchParams } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Ecran, EnteteEcran, TitreEcran, BoutonPrincipal } from '@/components/interface-kartnet';
 import { CouleursMarque as C } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
 import { useVoyages } from '@/features/voyages/contexte-voyages';
+import { getPhotoUri } from '@/repositories/photoStorage';
 
 export default function EcranDetailVoyage() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -33,10 +35,34 @@ export default function EcranDetailVoyage() {
           <Pressable accessibilityRole="button" style={styles.addButton}><Text style={styles.addText}>＋</Text></Pressable>
         </Link>
       </View>
-      <View style={styles.emptyPhotos}>
-        <Text style={styles.emptyIcon}>▧</Text>
-        <Text style={styles.emptyText}>{Textes.voyage.texteSansPhoto}</Text>
-      </View>
+      {voyage.souvenirs.length > 0 ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.souvenirs}
+        >
+          {voyage.souvenirs.map((souvenir) => (
+            <View key={souvenir.id} style={styles.carteSouvenir}>
+              <Image
+                source={{ uri: getPhotoUri(souvenir.cheminPhoto) }}
+                contentFit="cover"
+                style={styles.photoSouvenir}
+                accessibilityLabel={Textes.photos.photosAssociees}
+              />
+              <Text style={styles.legendeSouvenir}>
+                {souvenir.position
+                  ? `${Textes.photos.positionAssociee} · ${souvenir.position.latitude.toFixed(4)}, ${souvenir.position.longitude.toFixed(4)}`
+                  : Textes.photos.positionIndisponible}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+      ) : (
+        <View style={styles.emptyPhotos}>
+          <Text style={styles.emptyIcon}>▧</Text>
+          <Text style={styles.emptyText}>{Textes.voyage.texteSansPhoto}</Text>
+        </View>
+      )}
       <Link href={{ pathname: '/carte-voyage/[id]', params: { id: voyage.id } }} asChild>
         <Pressable accessibilityRole="button" style={styles.mapCard}>
           <View style={styles.mapPin}><Text style={styles.pinGlyph}>⌖</Text></View>
@@ -59,6 +85,10 @@ const styles = StyleSheet.create({
   addButton: { width: 37, height: 37, borderRadius: 13, backgroundColor: C.coral, alignItems: 'center', justifyContent: 'center' },
   addText: { color: C.paper, fontSize: 24, lineHeight: 26 },
   emptyPhotos: { minHeight: 150, borderRadius: 17, borderWidth: 1, borderStyle: 'dashed', borderColor: C.line, alignItems: 'center', justifyContent: 'center', padding: 20 },
+  souvenirs: { gap: 12, paddingBottom: 4 },
+  carteSouvenir: { width: 170, padding: 7, borderRadius: 16, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line },
+  photoSouvenir: { width: '100%', height: 150, borderRadius: 11, backgroundColor: C.photoPlaceholder },
+  legendeSouvenir: { color: C.muted, fontSize: 10, marginTop: 8, marginHorizontal: 3, marginBottom: 2 },
   emptyIcon: { color: C.coral, fontSize: 26, marginBottom: 8 },
   emptyText: { color: C.muted, textAlign: 'center', fontSize: 12, lineHeight: 18 },
   mapCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.paper, borderRadius: 17, borderWidth: 1, borderColor: C.line, padding: 14, marginTop: 18, marginBottom: 13 },
