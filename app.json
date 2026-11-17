@@ -59,8 +59,7 @@
           "locationWhenInUsePermission": "Kartnet utilise votre position pour placer vos souvenirs sur la carte.",
           "locationAlwaysAndWhenInUsePermission": "Kartnet utilise votre position pour placer vos souvenirs sur la carte.",
           "motionUsagePermission": "Kartnet n'utilise pas les capteurs de mouvement."        }
-      ],
-      "expo-notifications"
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
