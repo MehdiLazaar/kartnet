@@ -25,7 +25,7 @@ import { getPhotoUri } from "@/repositories/photoStorage";
 
 export default function EcranDetailVoyage() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { obtenirVoyage, supprimerSouvenir } = useVoyages();
+  const { obtenirVoyage, supprimerVoyage, supprimerSouvenir } = useVoyages();
   const [photoApercue, setPhotoApercue] = useState<string | null>(null);
   const voyage = obtenirVoyage(id);
 
@@ -43,8 +43,27 @@ export default function EcranDetailVoyage() {
 
   const voyageId = voyage.id;
 
-  // Demande confirmation puis retire le souvenir du carnet sans supprimer le fichier photo de l’appareil.
-  function confirmerSuppression(idSouvenir: string) {
+  // Supprimer le voyage entier (bouton en bas de la page).
+  const confirmerSuppressionVoyage = () => {
+    Alert.alert(
+      Textes.voyage.titreSuppression,
+      Textes.voyage.messageSuppression,
+      [
+        { text: Textes.voyage.annuler, style: "cancel" },
+        {
+          text: Textes.voyage.confirmerSuppression,
+          style: "destructive",
+          onPress: () => {
+            router.back(); // on quitte d'abord la page
+            supprimerVoyage(voyageId); // puis on supprime le voyage dans Firestore
+          },
+        },
+      ],
+    );
+  };
+
+  // Supprimer une seule photo (la croix) : retire la fiche du carnet, le fichier reste sur l’appareil.
+  const confirmerSuppressionPhoto = (idSouvenir: string) => {
     Alert.alert(
       Textes.photos.titreSuppression,
       Textes.photos.confirmationSuppression,
@@ -53,17 +72,27 @@ export default function EcranDetailVoyage() {
         {
           text: Textes.photos.confirmerSuppression,
           style: "destructive",
-          onPress: () => {
-            supprimerSouvenir(voyageId, idSouvenir);
-          },
+          onPress: () => supprimerSouvenir(voyageId, idSouvenir),
         },
       ],
     );
-  }
+  };
 
   return (
     <Ecran>
-      <EnteteEcran back="/voyages" />
+      <EnteteEcran
+        back="/voyages"
+        action={
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={Textes.voyage.libelleAccessibiliteModifier}
+            onPress={() => router.push({ pathname: "/modifier-voyage/[id]", params: { id: voyageId } })}
+            style={styles.boutonModifier}
+          >
+            <Text style={styles.texteModifier}>✎</Text>
+          </Pressable>
+        }
+      />
       <TitreEcran
         eyebrow={voyage.destination.toUpperCase()}
         title={voyage.title}
@@ -113,7 +142,7 @@ export default function EcranDetailVoyage() {
                 accessibilityRole="button"
                 accessibilityLabel={Textes.photos.libelleSupprimerPhoto}
                 onPress={() =>
-                  confirmerSuppression(souvenir.id)
+                  confirmerSuppressionPhoto(souvenir.id)
                 }
                 hitSlop={8}
                 style={styles.boutonSupprimer}
@@ -160,6 +189,13 @@ export default function EcranDetailVoyage() {
           })
         }
       />
+      <Pressable
+        accessibilityRole="button"
+        onPress={confirmerSuppressionVoyage}
+        style={styles.boutonSupprimerVoyage}
+      >
+        <Text style={styles.texteSupprimerVoyage}>{Textes.voyage.boutonSupprimer}</Text>
+      </Pressable>
       <Modal
         visible={photoApercue !== null}
         transparent
@@ -313,4 +349,10 @@ const styles = StyleSheet.create({
   mapTitle: { color: C.ink, fontSize: 13, fontWeight: "700" },
   mapSubtitle: { color: C.muted, fontSize: 11, marginTop: 4 },
   arrow: { color: C.coral, fontSize: 20 },
+  boutonSupprimerVoyage: { alignItems: "center", marginTop: 20, paddingVertical: 12 },
+  texteSupprimerVoyage: { color: "#B84E3D", fontSize: 13, fontWeight: "700" },
+  boutonModifier: { width: 38, height: 38, borderRadius: 13, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' },
+  texteModifier: { color: C.ink, fontSize: 18 },
 });
+
+

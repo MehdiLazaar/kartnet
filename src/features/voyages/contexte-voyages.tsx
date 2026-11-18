@@ -9,9 +9,10 @@ import {
   useState,
 } from "react";
 
+import { Textes } from "@/constants/textes";
 import { useAuth } from "@/hooks/use-auth";
 import { createMemory, removeMemoryRecord, watchMemories } from "@/repositories/memoryRepository";
-import { createTrip, watchTrips } from "@/repositories/tripRepository";
+import { createTrip, deleteTrip, updateTrip, watchTrips } from "@/repositories/tripRepository";
 import type { Memory, Trip } from "@/types/model";
 
 export type Voyage = {
@@ -33,6 +34,8 @@ export type SouvenirVoyage = {
 type ContexteVoyagesValue = {
   trips: Voyage[];
   creerVoyage: (title: string, destination: string) => Voyage;
+  modifierVoyage: (id: string, title: string, destination: string) => void;
+  supprimerVoyage: (id: string) => void;
   obtenirVoyage: (id: string) => Voyage | undefined;
   ajouterSouvenir: (idVoyage: string, souvenir: SouvenirVoyage) => void;
   supprimerSouvenir: (idVoyage: string, idSouvenir: string) => void;
@@ -96,31 +99,41 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
     [tripsFirestore, souvenirsParVoyage],
   );
 
-  // Crée le document Firestore et renvoie tout de suite son identifiant local.
-  const creerVoyage = useCallback(
-    (title: string, destination: string): Voyage => {
-      if (!uid) throw new Error("Il faut être connecté pour créer un voyage.");
+  // createTrip renvoie l'id sans attendre le serveur car Firestore le génère sur le téléphone.
+  // Sans destination, on enregistre null : le texte de remplacement n'existe qu'à l'affichage.
+  const creerVoyage = useCallback((title: string, destination: string): Voyage => {
+    if (!uid) throw new Error("Il faut être connecté pour créer un voyage.");
+    const id = createTrip(uid, {
+      title: title.trim(),
+      destination: destination.trim() || null,
+      description: null,
+      startDate: Timestamp.now(),
+      endDate: null,
+    });
+    return {
+      id,
+      title: title.trim(),
+      destination: destination.trim() || Textes.voyage.destinationParDefaut,
+      dateLabel: "Aujourd’hui",
+      photoCount: 0,
+      souvenirs: [],
+    };
+  }, [uid]);
 
-      const voyage = {
-        title: title.trim(),
-        destination: destination.trim() || "Destination à préciser",
-        description: null,
-        startDate: Timestamp.now(),
-        endDate: null,
-      };
-      const id = createTrip(uid, voyage);
+  const modifierVoyage = useCallback((id: string, title: string, destination: string) => {
+    if (!uid) return;
+    updateTrip(uid, id, {
+      title: title.trim(), // le trim enlève les espaces en trop au début et à la fin
+      destination: destination.trim(),
+    });
+  }, [uid]);
 
-      return {
-        id,
-        title: voyage.title,
-        destination: voyage.destination,
-        dateLabel: "Aujourd’hui",
-        photoCount: 0,
-        souvenirs: [],
-      };
-    },
-    [uid],
-  );
+  // deleteTrip est async (il lit d'abord les souvenirs à effacer) : il renvoie une Promise,
+  // on attrape donc l'erreur éventuelle pour l'afficher dans la console.
+  const supprimerVoyage = useCallback((id: string) => {
+    if (!uid) return;
+    deleteTrip(uid, id).catch((error) => console.error("[voyages] suppression", error));
+  }, [uid]);
 
   const obtenirVoyage = useCallback(
     (id: string) => trips.find((trip) => trip.id === id),
@@ -161,11 +174,13 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
     () => ({
       trips,
       creerVoyage,
+      modifierVoyage,
+      supprimerVoyage,
       obtenirVoyage,
       ajouterSouvenir,
       supprimerSouvenir,
     }),
-    [trips, creerVoyage, obtenirVoyage, ajouterSouvenir, supprimerSouvenir],
+    [trips, creerVoyage, modifierVoyage, supprimerVoyage, obtenirVoyage, ajouterSouvenir, supprimerSouvenir],
   );
 
   return (
@@ -203,7 +218,7 @@ function versVoyage(trip: Trip, memories: Memory[]): Voyage {
   return {
     id: trip.id,
     title: trip.title,
-    destination: trip.destination ?? "Destination à préciser",
+    destination: trip.destination ?? Textes.voyage.destinationParDefaut,
     dateLabel: trip.startDate.toDate().toLocaleDateString("fr-FR", {
       day: "numeric",
       month: "long",

@@ -1,11 +1,11 @@
-import { Link } from 'expo-router';
-import { PropsWithChildren } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { CouleursMarque as C } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
 import type { Voyage } from '@/features/voyages/contexte-voyages';
+import type { Href } from 'expo-router';
+import { Link, router } from 'expo-router';
+import { PropsWithChildren } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export function Ecran({ children }: PropsWithChildren) {
   return (
@@ -16,15 +16,13 @@ export function Ecran({ children }: PropsWithChildren) {
     </SafeAreaView>
   );
 }
-
-export function EnteteEcran({ back = '/', action }: { back?: string; action?: React.ReactNode }) {
+//Si on peut revenir en arriere (router.canGoBack()) donc si il y à un écran sous la pile, on le fait (router.back()) : sinon (si il y a rien dessous) on remplace l'écran par back
+export function EnteteEcran({ back = '/', action }: { back?: Href; action?: React.ReactNode }) {
   return (
     <View style={styles.header}>
-      <Link href={back as never} asChild>
-        <Pressable accessibilityRole="button" accessibilityLabel="Retour" style={styles.backButton}>
-          <Text style={styles.backText}>‹</Text>
-        </Pressable>
-      </Link>
+      <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace(back))} accessibilityRole="button" accessibilityLabel="Retour" style={styles.backButton}>
+        <Text style={styles.backText}>‹</Text>
+      </Pressable>
       <Text style={styles.brand}>{Textes.nomMarque}</Text>
       <View style={styles.headerAction}>{action}</View>
     </View>
