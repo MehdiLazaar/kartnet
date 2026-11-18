@@ -74,3 +74,12 @@ export function deleteMemory(uid: string, tripId: string, memory: Memory): void 
     .then(() => deletePhoto(memory.localPhotoPath))
     .catch(logError('deleteMemory'));
 }
+
+// Retire la fiche du carnet tout en conservant le fichier photo local sur l’appareil.
+export function removeMemoryRecord(
+  uid: string,
+  tripId: string,
+  memoryId: string,
+): void {
+  deleteDoc(memoryDoc(uid, tripId, memoryId)).catch(logError('removeMemoryRecord'));
+}

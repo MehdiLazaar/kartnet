@@ -1,13 +1,16 @@
 import { Image } from "expo-image";
 import { Link, router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import {
   Alert,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   BoutonPrincipal,
@@ -23,6 +26,7 @@ import { getPhotoUri } from "@/repositories/photoStorage";
 export default function EcranDetailVoyage() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { obtenirVoyage, supprimerSouvenir } = useVoyages();
+  const [photoApercue, setPhotoApercue] = useState<string | null>(null);
   const voyage = obtenirVoyage(id);
 
   if (!voyage) {
@@ -91,12 +95,20 @@ export default function EcranDetailVoyage() {
         >
           {voyage.souvenirs.map((souvenir) => (
             <View key={souvenir.id} style={styles.carteSouvenir}>
-              <Image
-                source={{ uri: getPhotoUri(souvenir.cheminPhoto) }}
-                contentFit="cover"
-                style={styles.photoSouvenir}
-                accessibilityLabel={Textes.photos.photosAssociees}
-              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={Textes.photos.libelleOuvrirPhoto}
+                onPress={() =>
+                  setPhotoApercue(getPhotoUri(souvenir.cheminPhoto))
+                }
+              >
+                <Image
+                  source={{ uri: getPhotoUri(souvenir.cheminPhoto) }}
+                  contentFit="cover"
+                  style={styles.photoSouvenir}
+                  accessibilityLabel={Textes.photos.photosAssociees}
+                />
+              </Pressable>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={Textes.photos.libelleSupprimerPhoto}
@@ -148,6 +160,37 @@ export default function EcranDetailVoyage() {
           })
         }
       />
+      <Modal
+        visible={photoApercue !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPhotoApercue(null)}
+      >
+        <View style={styles.vuePhotoPleinEcran}>
+          {photoApercue ? (
+            <Image
+              source={{ uri: photoApercue }}
+              contentFit="contain"
+              style={StyleSheet.absoluteFill}
+              accessibilityLabel={Textes.photos.photosAssociees}
+            />
+          ) : null}
+          <SafeAreaView
+            style={styles.enteteApercu}
+            edges={["top", "right"]}
+          >
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={Textes.photos.libelleFermerPhoto}
+              onPress={() => setPhotoApercue(null)}
+              hitSlop={8}
+              style={styles.boutonFermerApercu}
+            >
+              <Text style={styles.texteFermerApercu}>×</Text>
+            </Pressable>
+          </SafeAreaView>
+        </View>
+      </Modal>
     </Ecran>
   );
 }
@@ -212,6 +255,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   texteSupprimer: { color: C.paper, fontSize: 22, lineHeight: 25 },
+  vuePhotoPleinEcran: {
+    flex: 1,
+    backgroundColor: "#000",
+    justifyContent: "center",
+  },
+  enteteApercu: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    padding: 12,
+  },
+  boutonFermerApercu: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "rgba(30,30,30,0.78)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  texteFermerApercu: { color: "#fff", fontSize: 30, lineHeight: 33 },
   legendeSouvenir: {
     color: C.muted,
     fontSize: 10,
