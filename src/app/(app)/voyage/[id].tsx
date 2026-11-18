@@ -1,38 +1,86 @@
-import { Link, router, useLocalSearchParams } from 'expo-router';
-import { Image } from 'expo-image';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image } from "expo-image";
+import { Link, router, useLocalSearchParams } from "expo-router";
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
-import { Ecran, EnteteEcran, TitreEcran, BoutonPrincipal } from '@/components/interface-kartnet';
-import { CouleursMarque as C } from '@/constants/identite-visuelle';
-import { Textes } from '@/constants/textes';
-import { useVoyages } from '@/features/voyages/contexte-voyages';
-import { getPhotoUri } from '@/repositories/photoStorage';
+import {
+  BoutonPrincipal,
+  Ecran,
+  EnteteEcran,
+  TitreEcran,
+} from "@/components/interface-kartnet";
+import { CouleursMarque as C } from "@/constants/identite-visuelle";
+import { Textes } from "@/constants/textes";
+import { useVoyages } from "@/features/voyages/contexte-voyages";
+import { getPhotoUri } from "@/repositories/photoStorage";
 
 export default function EcranDetailVoyage() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { obtenirVoyage } = useVoyages();
+  const { obtenirVoyage, supprimerSouvenir } = useVoyages();
   const voyage = obtenirVoyage(id);
 
   if (!voyage) {
     return (
       <Ecran>
         <EnteteEcran back="/voyages" />
-        <TitreEcran title={Textes.voyage.introuvable} subtitle={Textes.voyage.retourListe} />
+        <TitreEcran
+          title={Textes.voyage.introuvable}
+          subtitle={Textes.voyage.retourListe}
+        />
       </Ecran>
+    );
+  }
+
+  const voyageId = voyage.id;
+
+  // Demande confirmation puis retire le souvenir du carnet sans supprimer le fichier photo de l’appareil.
+  function confirmerSuppression(idSouvenir: string) {
+    Alert.alert(
+      Textes.photos.titreSuppression,
+      Textes.photos.confirmationSuppression,
+      [
+        { text: Textes.photos.annulerSuppression, style: "cancel" },
+        {
+          text: Textes.photos.confirmerSuppression,
+          style: "destructive",
+          onPress: () => {
+            supprimerSouvenir(voyageId, idSouvenir);
+          },
+        },
+      ],
     );
   }
 
   return (
     <Ecran>
       <EnteteEcran back="/voyages" />
-      <TitreEcran eyebrow={voyage.destination.toUpperCase()} title={voyage.title} subtitle={`${voyage.dateLabel}  ·  ${voyage.photoCount} ${Textes.voyage.motPhotos}`} />
+      <TitreEcran
+        eyebrow={voyage.destination.toUpperCase()}
+        title={voyage.title}
+        subtitle={`${voyage.dateLabel}  ·  ${voyage.photoCount} ${Textes.voyage.motPhotos}`}
+      />
       <View style={styles.sectionHeader}>
         <View>
-          <Text style={styles.sectionEyebrow}>{Textes.voyage.titreSectionPhotos}</Text>
-          <Text style={styles.sectionTitle}>{Textes.voyage.libelleNombrePhotos}</Text>
+          <Text style={styles.sectionEyebrow}>
+            {Textes.voyage.titreSectionPhotos}
+          </Text>
+          <Text style={styles.sectionTitle}>
+            {Textes.voyage.libelleNombrePhotos}
+          </Text>
         </View>
-        <Link href={{ pathname: '/ajouter-photos/[id]', params: { id: voyage.id } }} asChild>
-          <Pressable accessibilityRole="button" style={styles.addButton}><Text style={styles.addText}>＋</Text></Pressable>
+        <Link
+          href={{ pathname: "/ajouter-photos/[id]", params: { id: voyage.id } }}
+          asChild
+        >
+          <Pressable accessibilityRole="button" style={styles.addButton}>
+            <Text style={styles.addText}>＋</Text>
+          </Pressable>
         </Link>
       </View>
       {voyage.souvenirs.length > 0 ? (
@@ -49,6 +97,17 @@ export default function EcranDetailVoyage() {
                 style={styles.photoSouvenir}
                 accessibilityLabel={Textes.photos.photosAssociees}
               />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={Textes.photos.libelleSupprimerPhoto}
+                onPress={() =>
+                  confirmerSuppression(souvenir.id)
+                }
+                hitSlop={8}
+                style={styles.boutonSupprimer}
+              >
+                <Text style={styles.texteSupprimer}>×</Text>
+              </Pressable>
               <Text style={styles.legendeSouvenir}>
                 {souvenir.position
                   ? `${Textes.photos.positionAssociee} · ${souvenir.position.latitude.toFixed(4)}, ${souvenir.position.longitude.toFixed(4)}`
@@ -63,39 +122,132 @@ export default function EcranDetailVoyage() {
           <Text style={styles.emptyText}>{Textes.voyage.texteSansPhoto}</Text>
         </View>
       )}
-      <Link href={{ pathname: '/carte-voyage/[id]', params: { id: voyage.id } }} asChild>
+      <Link
+        href={{ pathname: "/carte-voyage/[id]", params: { id: voyage.id } }}
+        asChild
+      >
         <Pressable accessibilityRole="button" style={styles.mapCard}>
-          <View style={styles.mapPin}><Text style={styles.pinGlyph}>⌖</Text></View>
+          <View style={styles.mapPin}>
+            <Text style={styles.pinGlyph}>⌖</Text>
+          </View>
           <View style={styles.mapCopy}>
             <Text style={styles.mapTitle}>{Textes.voyage.titreCarte}</Text>
-            <Text style={styles.mapSubtitle}>{Textes.voyage.sousTitreCarte}</Text>
+            <Text style={styles.mapSubtitle}>
+              {Textes.voyage.sousTitreCarte}
+            </Text>
           </View>
           <Text style={styles.arrow}>→</Text>
         </Pressable>
       </Link>
-      <BoutonPrincipal label={Textes.voyage.boutonAjouterPhotos} onPress={() => router.push({ pathname: '/ajouter-photos/[id]', params: { id: voyage.id } })} />
+      <BoutonPrincipal
+        label={Textes.voyage.boutonAjouterPhotos}
+        onPress={() =>
+          router.push({
+            pathname: "/ajouter-photos/[id]",
+            params: { id: voyage.id },
+          })
+        }
+      />
     </Ecran>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 13 },
-  sectionEyebrow: { color: C.ocean, fontSize: 9, letterSpacing: 1.1, fontWeight: '800' },
-  sectionTitle: { color: C.ink, fontSize: 18, fontWeight: '700', marginTop: 4 },
-  addButton: { width: 37, height: 37, borderRadius: 13, backgroundColor: C.coral, alignItems: 'center', justifyContent: 'center' },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 13,
+  },
+  sectionEyebrow: {
+    color: C.ocean,
+    fontSize: 9,
+    letterSpacing: 1.1,
+    fontWeight: "800",
+  },
+  sectionTitle: { color: C.ink, fontSize: 18, fontWeight: "700", marginTop: 4 },
+  addButton: {
+    width: 37,
+    height: 37,
+    borderRadius: 13,
+    backgroundColor: C.coral,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   addText: { color: C.paper, fontSize: 24, lineHeight: 26 },
-  emptyPhotos: { minHeight: 150, borderRadius: 17, borderWidth: 1, borderStyle: 'dashed', borderColor: C.line, alignItems: 'center', justifyContent: 'center', padding: 20 },
+  emptyPhotos: {
+    minHeight: 150,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: C.line,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
   souvenirs: { gap: 12, paddingBottom: 4 },
-  carteSouvenir: { width: 170, padding: 7, borderRadius: 16, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line },
-  photoSouvenir: { width: '100%', height: 150, borderRadius: 11, backgroundColor: C.photoPlaceholder },
-  legendeSouvenir: { color: C.muted, fontSize: 10, marginTop: 8, marginHorizontal: 3, marginBottom: 2 },
+  carteSouvenir: {
+    width: 170,
+    padding: 7,
+    borderRadius: 16,
+    backgroundColor: C.paper,
+    borderWidth: 1,
+    borderColor: C.line,
+  },
+  photoSouvenir: {
+    width: "100%",
+    height: 150,
+    borderRadius: 11,
+    backgroundColor: C.photoPlaceholder,
+  },
+  boutonSupprimer: {
+    position: "absolute",
+    top: 11,
+    right: 11,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(16,20,20,0.78)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  texteSupprimer: { color: C.paper, fontSize: 22, lineHeight: 25 },
+  legendeSouvenir: {
+    color: C.muted,
+    fontSize: 10,
+    marginTop: 8,
+    marginHorizontal: 3,
+    marginBottom: 2,
+  },
   emptyIcon: { color: C.coral, fontSize: 26, marginBottom: 8 },
-  emptyText: { color: C.muted, textAlign: 'center', fontSize: 12, lineHeight: 18 },
-  mapCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.paper, borderRadius: 17, borderWidth: 1, borderColor: C.line, padding: 14, marginTop: 18, marginBottom: 13 },
-  mapPin: { width: 39, height: 39, borderRadius: 14, backgroundColor: C.mapTint, alignItems: 'center', justifyContent: 'center' },
+  emptyText: {
+    color: C.muted,
+    textAlign: "center",
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  mapCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: C.paper,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: C.line,
+    padding: 14,
+    marginTop: 18,
+    marginBottom: 13,
+  },
+  mapPin: {
+    width: 39,
+    height: 39,
+    borderRadius: 14,
+    backgroundColor: C.mapTint,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   pinGlyph: { color: C.ocean, fontSize: 21 },
   mapCopy: { flex: 1, paddingHorizontal: 12 },
-  mapTitle: { color: C.ink, fontSize: 13, fontWeight: '700' },
+  mapTitle: { color: C.ink, fontSize: 13, fontWeight: "700" },
   mapSubtitle: { color: C.muted, fontSize: 11, marginTop: 4 },
   arrow: { color: C.coral, fontSize: 20 },
 });

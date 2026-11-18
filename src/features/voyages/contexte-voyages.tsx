@@ -28,6 +28,7 @@ type ContexteVoyagesValue = {
   creerVoyage: (title: string, destination: string) => Voyage;
   obtenirVoyage: (id: string) => Voyage | undefined;
   ajouterSouvenir: (idVoyage: string, souvenir: SouvenirVoyage) => void;
+  supprimerSouvenir: (idVoyage: string, idSouvenir: string) => void;
 };
 
 const ContexteVoyages = createContext<ContexteVoyagesValue | null>(null);
@@ -71,9 +72,34 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
     },
     [],
   );
+  // Retire un souvenir du voyage ciblé et recalcule le compteur depuis la liste mise à jour.
+  const supprimerSouvenir = useCallback(
+    (idVoyage: string, idSouvenir: string) => {
+      setVoyages((voyagesActuels) =>
+        voyagesActuels.map((voyage) => {
+          if (voyage.id !== idVoyage) return voyage;
+          const souvenirs = voyage.souvenirs.filter(
+            (souvenir) => souvenir.id !== idSouvenir,
+          );
+          return {
+            ...voyage,
+            souvenirs,
+            photoCount: souvenirs.length,
+          };
+        }),
+      );
+    },
+    [],
+  );
   const value = useMemo(
-    () => ({ trips, creerVoyage, obtenirVoyage, ajouterSouvenir }),
-    [trips, creerVoyage, obtenirVoyage, ajouterSouvenir],
+    () => ({
+      trips,
+      creerVoyage,
+      obtenirVoyage,
+      ajouterSouvenir,
+      supprimerSouvenir,
+    }),
+    [trips, creerVoyage, obtenirVoyage, ajouterSouvenir, supprimerSouvenir],
   );
 
   return (
