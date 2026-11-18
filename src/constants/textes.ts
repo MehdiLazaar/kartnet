@@ -73,6 +73,12 @@ export const Textes = {
     erreurNomObligatoire: 'Ajoute un nom pour continuer.',
     noteEtapeSuivante: 'Tu pourras ajouter tes photos à ce carnet lorsqu’elles seront disponibles.',
   },
+  modifierVoyage: {
+    surtitre: 'TON CARNET',
+    titre: 'Modifier le voyage',
+    sousTitre: 'Change le nom ou la destination de ton carnet.',
+    bouton: 'Enregistrer',
+  },
   voyage: {
     titreSectionPhotos: 'LES SOUVENIRS EN IMAGES',
     libelleNombrePhotos: 'Photos',
@@ -84,6 +90,13 @@ export const Textes = {
     motPhotos: 'photos',
     introuvable: 'Voyage introuvable',
     retourListe: 'Reviens à tes carnets pour en choisir un autre.',
+    boutonSupprimer: 'Supprimer ce voyage',
+    titreSuppression: 'Supprimer ce voyage ?',
+    messageSuppression: 'Le voyage et ses photos seront supprimés définitivement.',
+    annuler: 'Annuler',
+    confirmerSuppression: 'Supprimer',
+    libelleAccessibiliteModifier: 'Modifier le voyage',
+    destinationParDefaut: 'Destination à préciser',
   },
   carte: {
     surtitre: 'TON ITINÉRAIRE',

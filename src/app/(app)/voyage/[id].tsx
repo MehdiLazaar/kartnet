@@ -1,16 +1,15 @@
-import { Link, router, useLocalSearchParams } from 'expo-router';
-import { Image } from 'expo-image';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-
-import { Ecran, EnteteEcran, TitreEcran, BoutonPrincipal } from '@/components/interface-kartnet';
+import { BoutonPrincipal, Ecran, EnteteEcran, TitreEcran } from '@/components/interface-kartnet';
 import { CouleursMarque as C } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
 import { useVoyages } from '@/features/voyages/contexte-voyages';
 import { getPhotoUri } from '@/repositories/photoStorage';
+import { Image } from 'expo-image';
+import { Link, router, useLocalSearchParams } from 'expo-router';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function EcranDetailVoyage() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { obtenirVoyage } = useVoyages();
+  const { obtenirVoyage, supprimerVoyage } = useVoyages();
   const voyage = obtenirVoyage(id);
 
   if (!voyage) {
@@ -22,9 +21,39 @@ export default function EcranDetailVoyage() {
     );
   }
 
+  const confirmerSuppression = () => {
+    Alert.alert(
+      Textes.voyage.titreSuppression,
+      Textes.voyage.messageSuppression,
+      [
+        { text: Textes.voyage.annuler, style: 'cancel' },
+        {
+          text: Textes.voyage.confirmerSuppression,
+          style: 'destructive',
+          onPress: () => {
+            router.back(); //on quitte d'abord la page
+            supprimerVoyage(voyage.id); //Après on supprime le voyage dans Firestore
+          },
+        },
+      ],
+    );
+  };
+
   return (
     <Ecran>
-      <EnteteEcran back="/voyages" />
+      <EnteteEcran
+        back="/voyages"
+        action={
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={Textes.voyage.libelleAccessibiliteModifier}
+            onPress={() => router.push({ pathname: '/modifier-voyage/[id]', params: { id: voyage.id } })}
+            style={styles.boutonModifier}
+          >
+            <Text style={styles.texteModifier}>✎</Text>
+          </Pressable>
+        }
+      />
       <TitreEcran eyebrow={voyage.destination.toUpperCase()} title={voyage.title} subtitle={`${voyage.dateLabel}  ·  ${voyage.photoCount} ${Textes.voyage.motPhotos}`} />
       <View style={styles.sectionHeader}>
         <View>
@@ -74,6 +103,14 @@ export default function EcranDetailVoyage() {
         </Pressable>
       </Link>
       <BoutonPrincipal label={Textes.voyage.boutonAjouterPhotos} onPress={() => router.push({ pathname: '/ajouter-photos/[id]', params: { id: voyage.id } })} />
+      <Pressable
+        accessibilityRole="button"
+        onPress={confirmerSuppression}
+        style={styles.boutonSupprimer}
+      >
+        <Text style={styles.texteSupprimer}>{Textes.voyage.boutonSupprimer}</Text>
+      </Pressable>
+
     </Ecran>
   );
 }
@@ -98,4 +135,10 @@ const styles = StyleSheet.create({
   mapTitle: { color: C.ink, fontSize: 13, fontWeight: '700' },
   mapSubtitle: { color: C.muted, fontSize: 11, marginTop: 4 },
   arrow: { color: C.coral, fontSize: 20 },
+  boutonSupprimer: { alignItems: 'center', marginTop: 20, paddingVertical: 12 },
+  texteSupprimer: { color: '#B84E3D', fontSize: 13, fontWeight: '700' },
+  boutonModifier: { width: 38, height: 38, borderRadius: 13, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' },
+  texteModifier: { color: C.ink, fontSize: 18 },
 });
+
+

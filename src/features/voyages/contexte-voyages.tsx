@@ -1,10 +1,10 @@
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-
+import { Textes } from '@/constants/textes';
 import { useAuth } from '@/hooks/use-auth';
 import { createMemory, watchMemories } from '@/repositories/memoryRepository';
-import { createTrip, watchTrips } from '@/repositories/tripRepository';
+import { createTrip, deleteTrip, updateTrip, watchTrips } from '@/repositories/tripRepository';
 import type { Memory, Trip } from '@/types/model';
 import { GeoPoint, Timestamp } from 'firebase/firestore';
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 export type Voyage = {
   id: string;
@@ -25,6 +25,8 @@ export type SouvenirVoyage = {
 type ContexteVoyagesValue = {
   trips: Voyage[];
   creerVoyage: (title: string, destination: string) => Voyage;
+  modifierVoyage: (id: string, title: string, destination: string) => void;
+  supprimerVoyage: (id: string) => void;
   obtenirVoyage: (id: string) => Voyage | undefined;
   ajouterSouvenir: (idVoyage: string, souvenir: SouvenirVoyage) => void;
 };
@@ -88,7 +90,7 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
       endDate: null,
     });
     return {
-      id, title: title.trim(), destination: destination.trim() || 'Destination à préciser',
+      id, title: title.trim(), destination: destination.trim() || Textes.voyage.destinationParDefaut,
       dateLabel: 'Aujourd’hui', photoCount: 0, souvenirs: []
     };
   }, [uid]);
@@ -108,9 +110,25 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
     });
   }, [uid]);
 
+  const modifierVoyage = useCallback((id: string, title: string, destination: string) => {
+    if (!uid) return;
+    updateTrip(uid, id, {
+      title: title.trim(), // le trim enlève les espaces en trop au début et à la fin 
+      destination: destination.trim()
+    });
+  }, [uid]);
+
+  //On fais un catch pour le delete car deleteTrip est async, il dois d'abord lire les souvenirs (getDocs) 
+  //pour savoir lesquels effacés. Du coup il renvoie une Promise, réussite ou en cas d'échec l'erreur dans la console.
+  const supprimerVoyage = useCallback((id: string) => {
+    if (!uid) return;
+    deleteTrip(uid, id).catch((error) => console.error('[voyages] suppression', error));
+  }, [uid]);
+  
+
   const value = useMemo(
-    () => ({ trips, creerVoyage, obtenirVoyage, ajouterSouvenir }),
-    [trips, creerVoyage, obtenirVoyage, ajouterSouvenir],
+    () => ({ trips, creerVoyage, obtenirVoyage, ajouterSouvenir, supprimerVoyage, modifierVoyage }),
+    [trips, creerVoyage, obtenirVoyage, ajouterSouvenir, supprimerVoyage, modifierVoyage],
   );
 
 
@@ -138,7 +156,7 @@ function versVoyage(trip: Trip, memories: Memory[]): Voyage {
   return {
     id: trip.id,
     title: trip.title,
-    destination: trip.destination ?? 'destination à préciser',
+    destination: trip.destination ?? Textes.voyage.destinationParDefaut,
     dateLabel: trip.startDate.toDate().toLocaleDateString('fr-FR', {
       day: 'numeric', month: 'long', year: 'numeric',
     }),
