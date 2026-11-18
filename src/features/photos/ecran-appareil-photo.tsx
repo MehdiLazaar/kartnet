@@ -1,5 +1,4 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
-import * as Location from "expo-location";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import {
@@ -14,8 +13,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CouleursMarque as C } from "@/constants/identite-visuelle";
 import { Textes } from "@/constants/textes";
+import { creerSouvenirDepuisPhoto } from "@/features/photos/creer-souvenir-photo";
 import { useVoyages } from "@/features/voyages/contexte-voyages";
-import { savePhoto } from "@/repositories/photoStorage";
 
 export default function EcranAppareilPhoto() {
   // L'identifiant transmis dans l'URL permet de rattacher le souvenir au bon voyage.
@@ -37,19 +36,10 @@ export default function EcranAppareilPhoto() {
     try {
       // La caméra renvoie d'abord un fichier temporaire dans le cache de l'application.
       const photo = await cameraRef.current.takePictureAsync({ quality: 0.9 });
-      const datePrise = new Date().toISOString();
-      const position = await obtenirPositionActuelle();
-      const idSouvenir = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      // On copie le fichier temporaire dans Documents avant de conserver son chemin.
-      const cheminPhoto = await savePhoto(photo.uri, idSouvenir);
+      const souvenir = await creerSouvenirDepuisPhoto(photo.uri);
 
       // Le contexte met à jour le carnet et son compteur de photos.
-      ajouterSouvenir(voyage.id, {
-        id: idSouvenir,
-        cheminPhoto,
-        datePrise,
-        position,
-      });
+      ajouterSouvenir(voyage.id, souvenir);
 
       router.replace({ pathname: "/voyage/[id]", params: { id: voyage.id } });
     } catch {
@@ -172,28 +162,6 @@ export default function EcranAppareilPhoto() {
       </SafeAreaView>
     </View>
   );
-}
-
-async function obtenirPositionActuelle(): Promise<{
-  latitude: number;
-  longitude: number;
-} | null> {
-  try {
-    // La localisation est facultative : la photo est conservée même sans autorisation GPS.
-    const autorisation = await Location.requestForegroundPermissionsAsync();
-    if (!autorisation.granted) return null;
-
-    const position = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
-    });
-    return {
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-    };
-  } catch {
-    // La photo reste utilisable même si le GPS est indisponible.
-    return null;
-  }
 }
 
 const styles = StyleSheet.create({
