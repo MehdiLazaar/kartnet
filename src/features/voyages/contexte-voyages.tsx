@@ -1,10 +1,11 @@
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-
-import { useAuth } from '@/hooks/use-auth';
-import { createMemory, watchMemories } from '@/repositories/memoryRepository';
-import { createTrip, watchTrips } from '@/repositories/tripRepository';
-import type { Memory, Trip } from '@/types/model';
-import { GeoPoint, Timestamp } from 'firebase/firestore';
+import {
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 export type Voyage = {
   id: string;
@@ -27,6 +28,7 @@ type ContexteVoyagesValue = {
   creerVoyage: (title: string, destination: string) => Voyage;
   obtenirVoyage: (id: string) => Voyage | undefined;
   ajouterSouvenir: (idVoyage: string, souvenir: SouvenirVoyage) => void;
+  supprimerSouvenir: (idVoyage: string, idSouvenir: string) => void;
 };
 
 const ContexteVoyages = createContext<ContexteVoyagesValue | null>(null);
@@ -82,44 +84,77 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
     if (!uid) throw new Error('Il faut etre connecté pour créer un voyage.');
     const id = createTrip(uid, {
       title: title.trim(),
-      destination: destination.trim() || null,
-      description: null,
-      startDate: Timestamp.now(),
-      endDate: null,
-    });
-    return {
-      id, title: title.trim(), destination: destination.trim() || 'Destination à préciser',
-      dateLabel: 'Aujourd’hui', photoCount: 0, souvenirs: []
+      destination: destination.trim() || "Destination à préciser",
+      dateLabel: "Aujourd’hui",
+      photoCount: 0,
+      souvenirs: [],
     };
   }, [uid]);
 
-  const obtenirVoyage = useCallback((id: string) => trips.find((trip) => trip.id === id), [trips]);
-
-  const ajouterSouvenir = useCallback((idVoyage: string, souvenir: SouvenirVoyage) => {
-    if (!uid) return;
-    createMemory(uid, idVoyage, souvenir.id, souvenir.cheminPhoto, {
-      takenAt: Timestamp.fromDate(new Date(souvenir.datePrise)),
-      location: souvenir.position
-        ? new GeoPoint(souvenir.position.latitude, souvenir.position.longitude)
-        : null,
-      placeName: null,
-      stepId: null,
-      note: null,
-    });
-  }, [uid]);
-
+  const obtenirVoyage = useCallback(
+    (id: string) => trips.find((trip) => trip.id === id),
+    [trips],
+  );
+  const ajouterSouvenir = useCallback(
+    (idVoyage: string, souvenir: SouvenirVoyage) => {
+      // Ajoute le souvenir au voyage et met à jour le compteur affiché dans le carnet.
+      setVoyages((voyagesActuels) =>
+        voyagesActuels.map((voyage) =>
+          voyage.id === idVoyage
+            ? {
+                ...voyage,
+                souvenirs: [...voyage.souvenirs, souvenir],
+                photoCount: voyage.photoCount + 1,
+              }
+            : voyage,
+        ),
+      );
+    },
+    [],
+  );
+  // Retire un souvenir du voyage ciblé et recalcule le compteur depuis la liste mise à jour.
+  const supprimerSouvenir = useCallback(
+    (idVoyage: string, idSouvenir: string) => {
+      setVoyages((voyagesActuels) =>
+        voyagesActuels.map((voyage) => {
+          if (voyage.id !== idVoyage) return voyage;
+          const souvenirs = voyage.souvenirs.filter(
+            (souvenir) => souvenir.id !== idSouvenir,
+          );
+          return {
+            ...voyage,
+            souvenirs,
+            photoCount: souvenirs.length,
+          };
+        }),
+      );
+    },
+    [],
+  );
   const value = useMemo(
-    () => ({ trips, creerVoyage, obtenirVoyage, ajouterSouvenir }),
-    [trips, creerVoyage, obtenirVoyage, ajouterSouvenir],
+    () => ({
+      trips,
+      creerVoyage,
+      obtenirVoyage,
+      ajouterSouvenir,
+      supprimerSouvenir,
+    }),
+    [trips, creerVoyage, obtenirVoyage, ajouterSouvenir, supprimerSouvenir],
   );
 
-
-  return <ContexteVoyages.Provider value={value}>{children}</ContexteVoyages.Provider>;
+  return (
+    <ContexteVoyages.Provider value={value}>
+      {children}
+    </ContexteVoyages.Provider>
+  );
 }
 
 export function useVoyages() {
   const context = useContext(ContexteVoyages);
-  if (!context) throw new Error('useVoyages doit être utilisé à l’intérieur de FournisseurVoyages.');
+  if (!context)
+    throw new Error(
+      "useVoyages doit être utilisé à l’intérieur de FournisseurVoyages.",
+    );
   return context;
 }
 
