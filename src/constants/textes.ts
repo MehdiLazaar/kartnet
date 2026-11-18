@@ -106,6 +106,8 @@ export const Textes = {
     confidentialite: 'Tes photos restent les tiennes. Tu gardes le contrôle sur les autorisations de localisation.',
     boutonRetourVoyage: 'Retour au carnet',
     photosAssociees: 'Tes photos',
+    libelleOuvrirPhoto: 'Ouvrir cette photo en plein écran',
+    libelleFermerPhoto: 'Fermer l’aperçu de la photo',
     positionAssociee: 'Position enregistrée',
     positionIndisponible: 'Position non disponible',
     titreSuppression: 'Supprimer cette photo ?',
