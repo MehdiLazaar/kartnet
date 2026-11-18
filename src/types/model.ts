@@ -9,6 +9,7 @@ import type { GeoPoint, Timestamp } from 'firebase/firestore';
 export type Trip = {
   id: string;
   title: string;
+  destination: string | null;     // pays ou ville principale, ex. "Portugal"
   description: string | null;
   startDate: Timestamp;
   endDate: Timestamp | null;      // null = voyage en cours
@@ -18,7 +19,7 @@ export type Trip = {
 };
 
 // Ce que l'écran de création fournit au repository
-export type NewTrip = Pick<Trip, 'title' | 'description' | 'startDate' | 'endDate'>;
+export type NewTrip = Pick<Trip, 'title' | 'destination' | 'description' | 'startDate' | 'endDate'>;
 
 // ---------- Étape (une ville visitée) : trips/{tripId}/steps/{stepId} ----------
 
