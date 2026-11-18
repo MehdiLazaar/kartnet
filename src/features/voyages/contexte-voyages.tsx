@@ -1,11 +1,18 @@
+import { GeoPoint, Timestamp } from "firebase/firestore";
 import {
   createContext,
-  PropsWithChildren,
+  type PropsWithChildren,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
+
+import { useAuth } from "@/hooks/use-auth";
+import { createMemory, removeMemoryRecord, watchMemories } from "@/repositories/memoryRepository";
+import { createTrip, watchTrips } from "@/repositories/tripRepository";
+import type { Memory, Trip } from "@/types/model";
 
 export type Voyage = {
   id: string;
@@ -28,52 +35,137 @@ type ContexteVoyagesValue = {
   creerVoyage: (title: string, destination: string) => Voyage;
   obtenirVoyage: (id: string) => Voyage | undefined;
   ajouterSouvenir: (idVoyage: string, souvenir: SouvenirVoyage) => void;
+  supprimerSouvenir: (idVoyage: string, idSouvenir: string) => void;
 };
 
 const ContexteVoyages = createContext<ContexteVoyagesValue | null>(null);
+const VOYAGES_VIDES: Trip[] = [];
+const SOUVENIRS_VIDES: Record<string, Memory[]> = {};
 
 export function FournisseurVoyages({ children }: PropsWithChildren) {
-  // Les voyages et leurs souvenirs sont partagés entre les écrans pendant la session.
-  // Cette version du contexte est en mémoire ; elle ne les restaure pas après fermeture.
-  const [trips, setVoyages] = useState<Voyage[]>([]);
+  const { user } = useAuth();
+  const uid = user?.uid;
+  const [tripsState, setTripsState] = useState<{
+    uid: string | undefined;
+    trips: Trip[];
+  }>({ uid: undefined, trips: [] });
+  const [souvenirsState, setSouvenirsState] = useState<{
+    uid: string | undefined;
+    parVoyage: Record<string, Memory[]>;
+  }>({ uid: undefined, parVoyage: {} });
+  const tripsFirestore =
+    tripsState.uid === uid ? tripsState.trips : VOYAGES_VIDES;
+  const souvenirsParVoyage =
+    souvenirsState.uid === uid ? souvenirsState.parVoyage : SOUVENIRS_VIDES;
 
-  const creerVoyage = useCallback((title: string, destination: string) => {
-    const trip: Voyage = {
-      id: `${Date.now()}`,
-      title: title.trim(),
-      destination: destination.trim() || "Destination à préciser",
-      dateLabel: "Aujourd’hui",
-      photoCount: 0,
-      souvenirs: [],
-    };
-    setVoyages((current) => [trip, ...current]);
-    return trip;
-  }, []);
+  // S’abonne aux voyages du compte actif ; l’uid dans l’état empêche d’afficher les données d’un autre compte.
+  useEffect(() => {
+    if (!uid) return;
+
+    return watchTrips(uid, (trips) => setTripsState({ uid, trips }));
+  }, [uid]);
+
+  const idsVoyages = tripsFirestore.map((trip) => trip.id).join(",");
+
+  // Garde les souscriptions aux souvenirs synchronisées avec les voyages visibles.
+  useEffect(() => {
+    if (!uid || !idsVoyages) {
+      return;
+    }
+
+    const unsubscribeMemories = idsVoyages.split(",").map((idVoyage) =>
+      watchMemories(uid, idVoyage, (memories) =>
+        setSouvenirsState((current) => ({
+          uid,
+          parVoyage: {
+            ...(current.uid === uid ? current.parVoyage : {}),
+            [idVoyage]: memories,
+          },
+        })),
+      ),
+    );
+
+    return () => unsubscribeMemories.forEach((unsubscribe) => unsubscribe());
+  }, [uid, idsVoyages]);
+
+  const trips = useMemo(
+    () =>
+      tripsFirestore.map((trip) =>
+        versVoyage(trip, souvenirsParVoyage[trip.id] ?? []),
+      ),
+    [tripsFirestore, souvenirsParVoyage],
+  );
+
+  // Crée le document Firestore et renvoie tout de suite son identifiant local.
+  const creerVoyage = useCallback(
+    (title: string, destination: string): Voyage => {
+      if (!uid) throw new Error("Il faut être connecté pour créer un voyage.");
+
+      const voyage = {
+        title: title.trim(),
+        destination: destination.trim() || "Destination à préciser",
+        description: null,
+        startDate: Timestamp.now(),
+        endDate: null,
+      };
+      const id = createTrip(uid, voyage);
+
+      return {
+        id,
+        title: voyage.title,
+        destination: voyage.destination,
+        dateLabel: "Aujourd’hui",
+        photoCount: 0,
+        souvenirs: [],
+      };
+    },
+    [uid],
+  );
 
   const obtenirVoyage = useCallback(
     (id: string) => trips.find((trip) => trip.id === id),
     [trips],
   );
+
+  // Enregistre la fiche du souvenir : le fichier photo est déjà dans le stockage local.
   const ajouterSouvenir = useCallback(
     (idVoyage: string, souvenir: SouvenirVoyage) => {
-      // Ajoute le souvenir au voyage et met à jour le compteur affiché dans le carnet.
-      setVoyages((voyagesActuels) =>
-        voyagesActuels.map((voyage) =>
-          voyage.id === idVoyage
-            ? {
-                ...voyage,
-                souvenirs: [...voyage.souvenirs, souvenir],
-                photoCount: voyage.photoCount + 1,
-              }
-            : voyage,
-        ),
-      );
+      if (!uid) return;
+
+      createMemory(uid, idVoyage, souvenir.id, souvenir.cheminPhoto, {
+        takenAt: Timestamp.fromDate(new Date(souvenir.datePrise)),
+        location: souvenir.position
+          ? new GeoPoint(
+              souvenir.position.latitude,
+              souvenir.position.longitude,
+            )
+          : null,
+        placeName: null,
+        stepId: null,
+        note: null,
+      });
     },
-    [],
+    [uid],
   );
+
+  // Retire uniquement la fiche Firestore : le fichier photo local est conservé.
+  const supprimerSouvenir = useCallback(
+    (idVoyage: string, idSouvenir: string) => {
+      if (!uid) return;
+      removeMemoryRecord(uid, idVoyage, idSouvenir);
+    },
+    [uid],
+  );
+
   const value = useMemo(
-    () => ({ trips, creerVoyage, obtenirVoyage, ajouterSouvenir }),
-    [trips, creerVoyage, obtenirVoyage, ajouterSouvenir],
+    () => ({
+      trips,
+      creerVoyage,
+      obtenirVoyage,
+      ajouterSouvenir,
+      supprimerSouvenir,
+    }),
+    [trips, creerVoyage, obtenirVoyage, ajouterSouvenir, supprimerSouvenir],
   );
 
   return (
@@ -85,9 +177,39 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
 
 export function useVoyages() {
   const context = useContext(ContexteVoyages);
-  if (!context)
+  if (!context) {
     throw new Error(
       "useVoyages doit être utilisé à l’intérieur de FournisseurVoyages.",
     );
+  }
   return context;
+}
+
+function versSouvenir(memory: Memory): SouvenirVoyage {
+  return {
+    id: memory.id,
+    cheminPhoto: memory.localPhotoPath,
+    datePrise: memory.takenAt.toDate().toISOString(),
+    position: memory.location
+      ? {
+          latitude: memory.location.latitude,
+          longitude: memory.location.longitude,
+        }
+      : null,
+  };
+}
+
+function versVoyage(trip: Trip, memories: Memory[]): Voyage {
+  return {
+    id: trip.id,
+    title: trip.title,
+    destination: trip.destination ?? "Destination à préciser",
+    dateLabel: trip.startDate.toDate().toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }),
+    photoCount: memories.length,
+    souvenirs: memories.map(versSouvenir),
+  };
 }

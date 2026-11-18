@@ -84,10 +84,11 @@ service cloud.firestore {
       let endDate = d.get('endDate', null);
       return d.keys().hasAll(['title', 'startDate', 'createdAt', 'updatedAt'])
         && d.keys().hasOnly([
-          'title', 'description', 'startDate', 'endDate', 'coverMemoryId',
+          'title', 'destination', 'description', 'startDate', 'endDate', 'coverMemoryId',
           'createdAt', 'updatedAt'
         ])
         && isText(d.title, 1, 80)
+        && isOptionalText(d.get('destination', null), 100)
         && isOptionalText(d.get('description', null), 2000)
         && d.startDate is timestamp
         && isOptionalTimestamp(endDate)
