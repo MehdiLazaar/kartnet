@@ -3,7 +3,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CarteVoyage } from '@/components/interface-kartnet';
-import { CouleursMarque as C } from '@/constants/identite-visuelle';
+import { SymboleKartnet } from '@/components/marque-kartnet';
+import { CouleursMarque as C, PoliceTitre } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
 import { useVoyages } from '@/features/voyages/contexte-voyages';
 
@@ -15,7 +16,7 @@ export default function EcranAccueil() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.topBar}>
           <View style={styles.brand}>
-            <View style={styles.brandMark}><View style={styles.brandLens} /></View>
+            <SymboleKartnet taille={42} />
             <Text style={styles.brandName}>{Textes.nomMarque}</Text>
           </View>
           <Pressable
@@ -28,7 +29,6 @@ export default function EcranAccueil() {
         </View>
 
         <View style={styles.intro}>
-          <Text style={styles.eyebrow}>{Textes.accueil.surtitre}</Text>
           <Text style={styles.title}>{Textes.accueil.accroche[0]}{'\n'}{Textes.accueil.accroche[1]}</Text>
           <Text style={styles.subtitle}>{Textes.accueil.slogan}</Text>
         </View>
@@ -67,16 +67,13 @@ export default function EcranAccueil() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: C.cream },
   content: { width: '100%', maxWidth: 600, alignSelf: 'center', paddingHorizontal: 22, paddingBottom: 30 },
-  topBar: { height: 54, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  brand: { flexDirection: 'row', alignItems: 'center', gap: 9 },
-  brandMark: { width: 31, height: 31, borderRadius: 16, backgroundColor: C.coral, alignItems: 'center', justifyContent: 'center' },
-  brandLens: { width: 12, height: 12, borderRadius: 7, borderWidth: 2, borderColor: C.paper },
-  brandName: { color: C.ink, fontSize: 20, fontWeight: '800', letterSpacing: -0.8 },
+  topBar: { height: 62, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  brandName: { color: C.ink, fontSize: 28, ...PoliceTitre },
   avatar: { width: 34, height: 34, borderRadius: 18, backgroundColor: C.avatar, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: C.ink, fontSize: 13, fontWeight: '700' },
-  intro: { paddingTop: 23, paddingBottom: 24 },
-  eyebrow: { color: C.ocean, fontSize: 10, fontWeight: '800', letterSpacing: 1.7, marginBottom: 9 },
-  title: { color: C.ink, fontSize: 35, lineHeight: 40, fontWeight: '700', letterSpacing: -1.1, fontFamily: 'Georgia' },
+  intro: { paddingTop: 12, paddingBottom: 24 },
+  title: { color: C.ink, fontSize: 35, lineHeight: 40, ...PoliceTitre },
   subtitle: { color: C.muted, fontSize: 14, marginTop: 9 },
   tripSection: { marginBottom: 7 },
   sectionTitle: { color: C.ink, fontSize: 16, fontWeight: '700', marginBottom: 11 },

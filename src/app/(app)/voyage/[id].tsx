@@ -1,3 +1,12 @@
+import {
+  Ecran,
+  EnteteEcran,
+  TitreEcran
+} from "@/components/interface-kartnet";
+import { CouleursMarque as C } from "@/constants/identite-visuelle";
+import { Textes } from "@/constants/textes";
+import { useVoyages } from "@/features/voyages/contexte-voyages";
+import { getPhotoUri } from "@/repositories/photoStorage";
 import { Image } from "expo-image";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -11,17 +20,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import {
-  BoutonPrincipal,
-  Ecran,
-  EnteteEcran,
-  TitreEcran,
-} from "@/components/interface-kartnet";
-import { CouleursMarque as C } from "@/constants/identite-visuelle";
-import { Textes } from "@/constants/textes";
-import { useVoyages } from "@/features/voyages/contexte-voyages";
-import { getPhotoUri } from "@/repositories/photoStorage";
 
 export default function EcranDetailVoyage() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -111,7 +109,12 @@ export default function EcranDetailVoyage() {
           href={{ pathname: "/ajouter-photos/[id]", params: { id: voyage.id } }}
           asChild
         >
-          <Pressable accessibilityRole="button" style={styles.addButton}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={Textes.voyage.boutonAjouterPhotos}
+            hitSlop={8}
+            style={styles.addButton}
+          >
             <Text style={styles.addText}>＋</Text>
           </Pressable>
         </Link>
@@ -180,15 +183,6 @@ export default function EcranDetailVoyage() {
           <Text style={styles.arrow}>→</Text>
         </Pressable>
       </Link>
-      <BoutonPrincipal
-        label={Textes.voyage.boutonAjouterPhotos}
-        onPress={() =>
-          router.push({
-            pathname: "/ajouter-photos/[id]",
-            params: { id: voyage.id },
-          })
-        }
-      />
       <Pressable
         accessibilityRole="button"
         onPress={confirmerSuppressionVoyage}
@@ -350,7 +344,7 @@ const styles = StyleSheet.create({
   mapSubtitle: { color: C.muted, fontSize: 11, marginTop: 4 },
   arrow: { color: C.coral, fontSize: 20 },
   boutonSupprimerVoyage: { alignItems: "center", marginTop: 20, paddingVertical: 12 },
-  texteSupprimerVoyage: { color: "#B84E3D", fontSize: 13, fontWeight: "700" },
+  texteSupprimerVoyage: { color: C.coralDeep, fontSize: 13, fontWeight: "700" },
   boutonModifier: { width: 38, height: 38, borderRadius: 13, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' },
   texteModifier: { color: C.ink, fontSize: 18 },
 });

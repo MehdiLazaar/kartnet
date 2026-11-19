@@ -1,6 +1,6 @@
 /** Textes affichés par l’application, regroupés par écran. */
 export const Textes = {
-  nomMarque: 'kartnet',
+  nomMarque: 'Kartnet', // charte : toujours K majuscule
   connexion: {
     surtitre: 'BON RETOUR',
     titre: 'Content de te revoir',
@@ -40,18 +40,16 @@ export const Textes = {
   accueil: {
     libelleAccessibiliteProfil: 'Ouvrir ton profil',
     initialeProfil: '•',
-    surtitre: 'TON CARNET DE VOYAGE',
     accroche: ['Chaque photo', 'a son histoire.'],
     slogan: 'Ton voyage, épinglé photo par photo.',
     titreDernierVoyage: 'Ton dernier voyage',
     titreCarnetVide: 'Ton carnet commence ici',
     texteCarnetVide: 'Crée un voyage pour retrouver tes photos et les lieux qui les ont marquées.',
     libelleAccessibiliteCreerVoyage: 'Créer un voyage',
-    boutonCreerVoyage: 'Créer mon premier voyage',
+    boutonCreerVoyage: 'Créer un voyage',
     piedDePage: 'Tes souvenirs, toujours à portée de main.',
   },
   voyages: {
-    surtitre: 'TES SOUVENIRS',
     titre: 'Tes voyages',
     sousTitre: 'Chaque escapade garde sa place dans ton carnet.',
     voyageSingulier: 'voyage',
@@ -71,7 +69,7 @@ export const Textes = {
     exempleDestination: 'Ex. : Portugal',
     boutonValider: 'Créer mon carnet',
     erreurNomObligatoire: 'Ajoute un nom pour continuer.',
-    noteEtapeSuivante: 'Tu pourras ajouter tes photos à ce carnet lorsqu’elles seront disponibles.',
+    noteEtapeSuivante: 'Tu pourras ajouter des photos lorsque ton carnet sera créé.',
   },
   modifierVoyage: {
     surtitre: 'TON CARNET',
@@ -88,7 +86,7 @@ export const Textes = {
     titreSectionPhotos: 'LES SOUVENIRS EN IMAGES',
     libelleNombrePhotos: 'Photos',
     sousTitreCarte: 'Les lieux associés à tes photos apparaîtront ici.',
-    texteSansPhoto: 'Tes photos et leurs lieux apparaîtront ici.',
+    texteSansPhoto: 'Ajoute ta première photo : son lieu sera épinglé sur la carte.',
     titreCarte: 'Le voyage sur la carte',
     boutonAjouterPhotos: 'Ajouter des photos',
     lienVoirCarte: 'Voir la carte du voyage',

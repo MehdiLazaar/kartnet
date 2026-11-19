@@ -2,6 +2,7 @@ import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Ecran, EnteteEcran, TitreEcran, CarteVoyage } from '@/components/interface-kartnet';
+import { MotifParcours } from '@/components/marque-kartnet';
 import { CouleursMarque as C } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
 import { useVoyages } from '@/features/voyages/contexte-voyages';
@@ -18,7 +19,8 @@ export default function EcranVoyages() {
           </Pressable>
         </Link>
       } />
-      <TitreEcran eyebrow={Textes.voyages.surtitre} title={Textes.voyages.titre} subtitle={Textes.voyages.sousTitre} />
+      <View style={styles.motif}><MotifParcours /></View>
+      <TitreEcran style={styles.titre} title={Textes.voyages.titre} subtitle={Textes.voyages.sousTitre} />
       <View style={styles.summary}>
         <Text style={styles.summaryNumber}>{trips.length}</Text>
         <Text style={styles.summaryLabel}>{trips.length > 1 ? Textes.voyages.voyagesPluriel : Textes.voyages.voyageSingulier}</Text>
@@ -37,6 +39,10 @@ export default function EcranVoyages() {
 }
 
 const styles = StyleSheet.create({
+  // Bannière de la charte : le trajet en pointillés au-dessus du titre (jamais derrière le texte).
+  motif: { marginTop: 8 },
+  // Le motif occupe déjà l'espace du haut : on resserre le bloc titre.
+  titre: { paddingTop: 12 },
   addButton: { width: 36, height: 36, borderRadius: 13, backgroundColor: C.coral, alignItems: 'center', justifyContent: 'center' },
   addText: { color: C.paper, fontSize: 23, lineHeight: 25 },
   summary: { flexDirection: 'row', alignItems: 'center', marginBottom: 14, gap: 8 },
