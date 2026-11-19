@@ -73,7 +73,6 @@ export function CarteVoyage({ trip }: { trip: Voyage }) {
           <Text style={styles.tripTitle}>{trip.title}</Text>
           <Text style={styles.tripMeta}>{trip.dateLabel}  ·  {trip.photoCount} photos</Text>
         </View>
-        <Text style={styles.cardArrow}>›</Text>
       </Pressable>
     </Link>
   );
@@ -102,5 +101,4 @@ const styles = StyleSheet.create({
   tripDestination: { color: C.ocean, fontSize: 10, fontWeight: '800', letterSpacing: 0.4, textTransform: 'uppercase' },
   tripTitle: { color: C.ink, fontSize: 16, fontWeight: '700', marginTop: 5 },
   tripMeta: { color: C.muted, fontSize: 11, marginTop: 7 },
-  cardArrow: { color: C.coral, fontSize: 25, paddingRight: 5 },
 });

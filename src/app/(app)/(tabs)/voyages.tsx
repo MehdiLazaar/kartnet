@@ -18,7 +18,7 @@ export default function EcranVoyages() {
           </Pressable>
         </Link>
       } />
-      <TitreEcran eyebrow={Textes.voyages.surtitre} title={Textes.voyages.titre} subtitle={Textes.voyages.sousTitre} />
+      <TitreEcran title={Textes.voyages.titre} subtitle={Textes.voyages.sousTitre} />
       <View style={styles.summary}>
         <Text style={styles.summaryNumber}>{trips.length}</Text>
         <Text style={styles.summaryLabel}>{trips.length > 1 ? Textes.voyages.voyagesPluriel : Textes.voyages.voyageSingulier}</Text>

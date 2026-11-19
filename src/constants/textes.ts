@@ -40,18 +40,16 @@ export const Textes = {
   accueil: {
     libelleAccessibiliteProfil: 'Ouvrir ton profil',
     initialeProfil: '•',
-    surtitre: 'TON CARNET DE VOYAGE',
     accroche: ['Chaque photo', 'a son histoire.'],
     slogan: 'Ton voyage, épinglé photo par photo.',
     titreDernierVoyage: 'Ton dernier voyage',
     titreCarnetVide: 'Ton carnet commence ici',
     texteCarnetVide: 'Crée un voyage pour retrouver tes photos et les lieux qui les ont marquées.',
     libelleAccessibiliteCreerVoyage: 'Créer un voyage',
-    boutonCreerVoyage: 'Créer mon premier voyage',
+    boutonCreerVoyage: 'Créer un voyage',
     piedDePage: 'Tes souvenirs, toujours à portée de main.',
   },
   voyages: {
-    surtitre: 'TES SOUVENIRS',
     titre: 'Tes voyages',
     sousTitre: 'Chaque escapade garde sa place dans ton carnet.',
     voyageSingulier: 'voyage',
@@ -71,7 +69,7 @@ export const Textes = {
     exempleDestination: 'Ex. : Portugal',
     boutonValider: 'Créer mon carnet',
     erreurNomObligatoire: 'Ajoute un nom pour continuer.',
-    noteEtapeSuivante: 'Tu pourras ajouter tes photos à ce carnet lorsqu’elles seront disponibles.',
+    noteEtapeSuivante: 'Tu pourras ajouter des photos lorsque ton carnet sera créé.',
   },
   modifierVoyage: {
     surtitre: 'TON CARNET',
