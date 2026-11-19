@@ -31,14 +31,18 @@ export async function creerSouvenirDepuisGalerie(
   const id = genererIdSouvenir();
   //asset.uri est l'adresse du fichier temporaire renvoyé par la galerie
   const cheminPhoto = await savePhoto(asset.uri, id);
+  //asset.exif contient les métadonnées de la photo, dont sa position GPS
+  const position = lirePositionExif(asset.exif);
+  //pas de position (ex. capture d'écran) : pas de nom de lieu, on n'appelle pas le service
+  const placeName = position ? await obtenirNomLieu(position) : null;
 
   return {
     id,
     cheminPhoto,
     datePrise: new Date().toISOString(),
-    //le asset.exif renvoie au tableau avec la latitude et longitude
-    position: lirePositionExif(asset.exif),
-  }
+    position,
+    placeName,
+  };
 }
 
 // La géolocalisation est facultative, si on l'as pas ca ne bloque pas le souvenir
@@ -57,21 +61,31 @@ async function obtenirPositionActuelle(): Promise<{
       latitude: gpsPosition.coords.latitude,
       longitude: gpsPosition.coords.longitude,
     };
-    let placeName: string | null = null;
-    try {
-      const [adresse] = await Location.reverseGeocodeAsync(position);
-      if (adresse) {
-        const ville = adresse.city ?? adresse.subregion ?? adresse.region;
-        placeName = [ville, adresse.country].filter(Boolean).join(', ') || null;
-      }
-    } catch {
-      // Le GPS reste exploitable si le service de géocodage est indisponible.
-    }
+    const placeName = await obtenirNomLieu(position);
     return { position, placeName };
   } catch {
     return null;
   }
 }
+
+// Transforme des coordonnées GPS en nom de lieu lisible (ex. "Brest, France"), ou null.
+// Partagé par la caméra et la galerie. Facultatif : si le service de géocodage échoue,
+// le souvenir reste valable avec sa position GPS, simplement sans nom.
+async function obtenirNomLieu(position: {
+  latitude: number;
+  longitude: number;
+}): Promise<string | null> {
+  try {
+    const [adresse] = await Location.reverseGeocodeAsync(position);
+    if (!adresse) return null;
+    const ville = adresse.city ?? adresse.subregion ?? adresse.region;
+    // filter(Boolean) retire les morceaux vides ; si tout est vide, join donne '' → null
+    return [ville, adresse.country].filter(Boolean).join(', ') || null;
+  } catch {
+    return null;
+  }
+}
+
 // Lit la position GPS enregistrée de l'exif de la photo, ou null si elle n'en contient pas.
 function lirePositionExif(
   exif: Record<string, unknown> | null | undefined,
