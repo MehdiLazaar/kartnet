@@ -13,10 +13,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
-  BoutonPrincipal,
   Ecran,
   EnteteEcran,
-  TitreEcran,
+  TitreEcran
 } from "@/components/interface-kartnet";
 import { CouleursMarque as C } from "@/constants/identite-visuelle";
 import { Textes } from "@/constants/textes";
@@ -111,7 +110,12 @@ export default function EcranDetailVoyage() {
           href={{ pathname: "/ajouter-photos/[id]", params: { id: voyage.id } }}
           asChild
         >
-          <Pressable accessibilityRole="button" style={styles.addButton}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={Textes.voyage.boutonAjouterPhotos}
+            hitSlop={8}
+            style={styles.addButton}
+          >
             <Text style={styles.addText}>＋</Text>
           </Pressable>
         </Link>
@@ -180,15 +184,6 @@ export default function EcranDetailVoyage() {
           <Text style={styles.arrow}>→</Text>
         </Pressable>
       </Link>
-      <BoutonPrincipal
-        label={Textes.voyage.boutonAjouterPhotos}
-        onPress={() =>
-          router.push({
-            pathname: "/ajouter-photos/[id]",
-            params: { id: voyage.id },
-          })
-        }
-      />
       <Pressable
         accessibilityRole="button"
         onPress={confirmerSuppressionVoyage}

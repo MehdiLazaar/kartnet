@@ -88,7 +88,7 @@ export const Textes = {
     titreSectionPhotos: 'LES SOUVENIRS EN IMAGES',
     libelleNombrePhotos: 'Photos',
     sousTitreCarte: 'Les lieux associés à tes photos apparaîtront ici.',
-    texteSansPhoto: 'Tes photos et leurs lieux apparaîtront ici.',
+    texteSansPhoto: 'Ajoute ta première photo : son lieu sera épinglé sur la carte.',
     titreCarte: 'Le voyage sur la carte',
     boutonAjouterPhotos: 'Ajouter des photos',
     lienVoirCarte: 'Voir la carte du voyage',
