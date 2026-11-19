@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Ecran, EnteteEcran, TitreEcran } from '@/components/interface-kartnet';
@@ -21,9 +21,13 @@ export default function EcranCarteVoyage() {
         <Text style={styles.emptyText}>{Textes.carte.noteCarteVide}</Text>
       </View>
       {voyage ? (
-        <Link href={{ pathname: '/voyage/[id]', params: { id: voyage.id } }} asChild>
-          <Pressable style={styles.backLink}><Text style={styles.backLinkText}>{Textes.carte.retourAuCarnet}</Text></Pressable>
-        </Link>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.dismissTo({ pathname: '/voyage/[id]', params: { id: voyage.id } })}
+          style={styles.backLink}
+        >
+          <Text style={styles.backLinkText}>{Textes.carte.retourAuCarnet}</Text>
+        </Pressable>
       ) : null}
     </Ecran>
   );
