@@ -1,4 +1,5 @@
-import { CouleursMarque as C, PoliceTitre } from '@/constants/identite-visuelle';
+import { SymboleKartnet } from '@/components/marque-kartnet';
+import { CouleursMarque as C, PoliceEtiquette, PoliceTitre } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
 import type { Voyage } from '@/features/voyages/contexte-voyages';
 import { getPhotoUri } from '@/repositories/photoStorage';
@@ -77,7 +78,7 @@ export function CarteVoyage({ trip }: { trip: Voyage }) {
         />
       ) : (
         <View style={styles.tripIcon}>
-          <Text style={styles.tripIconText}>⌖</Text>
+          <SymboleKartnet taille={30} />
         </View>
       )}
       <View style={styles.tripInfo}>
@@ -93,24 +94,26 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: C.cream },
   page: { width: '100%', maxWidth: 640, alignSelf: 'center', paddingHorizontal: 22, paddingBottom: 34 },
   header: { height: 54, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  backButton: { width: 38, height: 38, borderRadius: 13, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' },
-  backText: { color: C.ink, fontSize: 30, lineHeight: 33, marginTop: -3 },
-  brand: { color: C.ink, fontSize: 18, ...PoliceTitre },
+  // Charte « Carte au trésor » : coins presque droits et cadre d'encre brune de 2 px, comme une boîte de dialogue de RPG.
+  backButton: { width: 38, height: 38, borderRadius: 6, borderWidth: 2, borderColor: C.cadre, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' },
+  backText: { color: C.ink, fontSize: 28, lineHeight: 31, marginTop: -3 },
+  brand: { color: C.ink, fontSize: 26, ...PoliceTitre },
   headerAction: { width: 38, alignItems: 'flex-end' },
   titleBlock: { paddingTop: 25, paddingBottom: 21 },
-  eyebrow: { color: C.ocean, fontSize: 10, letterSpacing: 1.4, fontWeight: '800', marginBottom: 8 },
-  title: { color: C.ink, fontSize: 30, lineHeight: 36, ...PoliceTitre },
+  eyebrow: { color: C.ocean, fontSize: 10, marginBottom: 8, ...PoliceEtiquette },
+  // Jersey 10 est une police étroite : plus grande que l'ancienne pour garder la même présence.
+  title: { color: C.ink, fontSize: 38, lineHeight: 40, ...PoliceTitre },
   subtitle: { color: C.muted, fontSize: 14, lineHeight: 21, marginTop: 8 },
-  primaryButton: { minHeight: 54, paddingHorizontal: 17, borderRadius: 16, backgroundColor: C.coral, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  // Bouton de menu de RPG : cadre de 2 px et bord inférieur plus épais (ombre dure, identique iOS/Android).
+  primaryButton: { minHeight: 54, paddingHorizontal: 17, borderRadius: 6, borderWidth: 2, borderBottomWidth: 4, borderColor: C.cadre, backgroundColor: C.coral, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   primaryText: { color: C.paper, fontSize: 15, fontWeight: '700' },
   arrow: { color: C.paper, fontSize: 21, fontWeight: '600' },
   pressed: { opacity: 0.8 },
-  tripCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.paper, borderRadius: 16, padding: 12, marginBottom: 16, borderWidth: 1, borderColor: C.line },
-  tripIcon: { width: 70, height: 70, borderRadius: 18, backgroundColor: C.mapTint, alignItems: 'center', justifyContent: 'center' },
-  tripIconText: { color: C.ocean, fontSize: 26 },
+  tripCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.paper, borderRadius: 6, padding: 12, marginBottom: 16, borderWidth: 2, borderColor: C.cadre },
+  tripIcon: { width: 70, height: 70, borderRadius: 4, backgroundColor: C.mapTint, alignItems: 'center', justifyContent: 'center' },
   // Texte centré verticalement à côté de l'icône (alignItems: 'center' sur la carte), écart fixe de 14.
   tripInfo: { flex: 1, paddingLeft: 14 },
-  tripDestination: { color: C.ocean, fontSize: 10, fontWeight: '800', letterSpacing: 0.4, textTransform: 'uppercase' },
+  tripDestination: { color: C.ocean, fontSize: 10, textTransform: 'uppercase', ...PoliceEtiquette },
   tripTitle: { color: C.ink, fontSize: 16, fontWeight: '700', marginTop: 5 },
   tripMeta: { color: C.muted, fontSize: 13, lineHeight: 18, marginTop: 6 }, // charte : caption
 });

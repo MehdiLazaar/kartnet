@@ -3,7 +3,7 @@ import {
   EnteteEcran,
   TitreEcran
 } from "@/components/interface-kartnet";
-import { CouleursMarque as C } from "@/constants/identite-visuelle";
+import { CouleursMarque as C, PoliceEtiquette, PoliceTitre } from "@/constants/identite-visuelle";
 import { Textes } from "@/constants/textes";
 import { useVoyages } from "@/features/voyages/contexte-voyages";
 import { getPhotoUri } from "@/repositories/photoStorage";
@@ -235,14 +235,15 @@ const styles = StyleSheet.create({
   sectionEyebrow: {
     color: C.ocean,
     fontSize: 9,
-    letterSpacing: 1.1,
-    fontWeight: "800",
+    ...PoliceEtiquette,
   },
-  sectionTitle: { color: C.ink, fontSize: 18, fontWeight: "700", marginTop: 4 },
+  sectionTitle: { color: C.ink, fontSize: 26, lineHeight: 28, marginTop: 4, ...PoliceTitre },
   addButton: {
     width: 37,
     height: 37,
-    borderRadius: 13,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: C.cadre,
     backgroundColor: C.coral,
     alignItems: "center",
     justifyContent: "center",
@@ -250,10 +251,10 @@ const styles = StyleSheet.create({
   addText: { color: C.paper, fontSize: 24, lineHeight: 26 },
   emptyPhotos: {
     minHeight: 150,
-    borderRadius: 17,
-    borderWidth: 1,
+    borderRadius: 6,
+    borderWidth: 2,
     borderStyle: "dashed",
-    borderColor: C.line,
+    borderColor: C.muted,
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
@@ -262,15 +263,15 @@ const styles = StyleSheet.create({
   carteSouvenir: {
     width: 170,
     padding: 7,
-    borderRadius: 16,
+    borderRadius: 6,
     backgroundColor: C.paper,
-    borderWidth: 1,
-    borderColor: C.line,
+    borderWidth: 2,
+    borderColor: C.cadre,
   },
   photoSouvenir: {
     width: "100%",
     height: 150,
-    borderRadius: 11,
+    borderRadius: 3,
     backgroundColor: C.photoPlaceholder,
   },
   boutonSupprimer: {
@@ -323,9 +324,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: C.paper,
-    borderRadius: 17,
-    borderWidth: 1,
-    borderColor: C.line,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: C.cadre,
     padding: 14,
     marginTop: 18,
     marginBottom: 13,
@@ -333,7 +334,7 @@ const styles = StyleSheet.create({
   mapPin: {
     width: 39,
     height: 39,
-    borderRadius: 14,
+    borderRadius: 4,
     backgroundColor: C.mapTint,
     alignItems: "center",
     justifyContent: "center",
@@ -345,7 +346,7 @@ const styles = StyleSheet.create({
   arrow: { color: C.coral, fontSize: 20 },
   boutonSupprimerVoyage: { alignItems: "center", marginTop: 20, paddingVertical: 12 },
   texteSupprimerVoyage: { color: C.coralDeep, fontSize: 13, fontWeight: "700" },
-  boutonModifier: { width: 38, height: 38, borderRadius: 13, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' },
+  boutonModifier: { width: 38, height: 38, borderRadius: 6, borderWidth: 2, borderColor: C.cadre, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' },
   texteModifier: { color: C.ink, fontSize: 18 },
 });
 

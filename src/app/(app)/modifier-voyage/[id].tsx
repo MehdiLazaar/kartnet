@@ -1,5 +1,6 @@
 import { FormulaireVoyage } from '@/components/formulaire-voyage';
 import { Ecran, EnteteEcran, TitreEcran } from '@/components/interface-kartnet';
+import { SymboleKartnet } from '@/components/marque-kartnet';
 import { CouleursMarque as C } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
 import { choisirImageCouverture } from '@/features/photos/choisir-image-couverture';
@@ -71,7 +72,7 @@ export default function EcranModificationVoyage() {
                     />
                 ) : (
                 <View style={[styles.icone, styles.iconeVide]}>
-                    <Text style={styles.iconeGlyphe}>⌖</Text>
+                    <SymboleKartnet taille={30} />
                 </View>
                 )}
 
@@ -96,10 +97,9 @@ const styles = StyleSheet.create({
     // le bloc entier : l'icône à gauche, les textes à droite
     blocIcone: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 22 },
     // le carré de l'icône (image ou ⌖) : mêmes dimensions que tripIcon des cartes de voyage
-    icone: { width: 70, height: 70, borderRadius: 18 },
+    icone: { width: 70, height: 70, borderRadius: 4 },
     // ajouté au carré quand il n'y a pas d'image : fond coloré + ⌖ centré
     iconeVide: { backgroundColor: C.mapTint, alignItems: 'center', justifyContent: 'center' },
-    iconeGlyphe: { color: C.ocean, fontSize: 26 },
     // la colonne des deux textes prend toute la place restante
     texteIcone: { flex: 1 },
     libelleIcone: { color: C.ink, fontSize: 13, fontWeight: '700' },
