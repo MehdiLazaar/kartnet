@@ -53,6 +53,7 @@ const validTrip = () => ({
   startDate: Timestamp.fromDate(new Date('2026-04-01')),
   endDate: Timestamp.fromDate(new Date('2026-04-15')),
   coverMemoryId: null,
+  coverPhotoPath: null,
   ...created(),
 });
 
@@ -153,6 +154,18 @@ describe('trips', () => {
   it('la destination ne peut pas dépasser 100 caractères', async () => {
     await expect(
       setDoc(doc(db('alice'), aliceTrip), { ...validTrip(), destination: 'x'.repeat(101) }),
+    ).rejects.toMatchObject(DENIED);
+  });
+
+  it('un voyage peut avoir une icône', async () => {
+    await expect(
+      setDoc(doc(db('alice'), aliceTrip), { ...validTrip(), coverPhotoPath: 'memories/icone.jpg' }),
+    ).resolves.toBeUndefined();
+  });
+
+  it("le chemin de l'icône ne peut pas dépasser 512 caractères", async () => {
+    await expect(
+      setDoc(doc(db('alice'), aliceTrip), { ...validTrip(), coverPhotoPath: 'x'.repeat(513) }),
     ).rejects.toMatchObject(DENIED);
   });
 

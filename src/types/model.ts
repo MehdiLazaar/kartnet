@@ -14,6 +14,7 @@ export type Trip = {
   startDate: Timestamp;
   endDate: Timestamp | null;      // null = voyage en cours
   coverMemoryId: string | null;   // id du souvenir utilisé comme couverture
+  coverPhotoPath: string | null;  // icône du voyage : chemin RELATIF local, ex. "memories/abc.jpg"
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };

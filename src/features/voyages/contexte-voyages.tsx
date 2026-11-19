@@ -12,7 +12,7 @@ import {
 import { Textes } from "@/constants/textes";
 import { useAuth } from "@/hooks/use-auth";
 import { createMemory, removeMemoryRecord, watchMemories } from "@/repositories/memoryRepository";
-import { createTrip, deleteTrip, updateTrip, watchTrips } from "@/repositories/tripRepository";
+import { createTrip, deleteTrip, setTripCover, updateTrip, watchTrips } from "@/repositories/tripRepository";
 import type { Memory, Trip } from "@/types/model";
 
 export type Voyage = {
@@ -22,6 +22,7 @@ export type Voyage = {
   dateLabel: string;
   photoCount: number;
   souvenirs: SouvenirVoyage[];
+  cheminCouverture: string | null;
 };
 
 export type SouvenirVoyage = {
@@ -36,6 +37,7 @@ type ContexteVoyagesValue = {
   trips: Voyage[];
   creerVoyage: (title: string, destination: string) => Voyage;
   modifierVoyage: (id: string, title: string, destination: string) => void;
+  changerCouverture: (id: string, cheminPhoto: string) => void;
   supprimerVoyage: (id: string) => void;
   obtenirVoyage: (id: string) => Voyage | undefined;
   ajouterSouvenir: (idVoyage: string, souvenir: SouvenirVoyage) => void;
@@ -118,6 +120,7 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
       dateLabel: "Aujourd’hui",
       photoCount: 0,
       souvenirs: [],
+      cheminCouverture: null,
     };
   }, [uid]);
 
@@ -128,6 +131,15 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
       destination: destination.trim(),
     });
   }, [uid]);
+
+  // Change l'icône du voyage. On transmet l'ancien chemin pour que le repository efface l'ancien fichier.
+  // tripsFirestore est dans les dépendances : sinon la fonction garderait la liste du démarrage.
+  const changerCouverture = useCallback((id: string, cheminPhoto: string) => {
+    if (!uid) return;
+    // ?? null : les anciens voyages n'ont pas le champ (undefined)
+    const ancienChemin = tripsFirestore.find((trip) => trip.id === id)?.coverPhotoPath ?? null;
+    setTripCover(uid, id, cheminPhoto, ancienChemin);
+  }, [uid, tripsFirestore]);
 
   // deleteTrip est async (il lit d'abord les souvenirs à effacer) : il renvoie une Promise,
   // on attrape donc l'erreur éventuelle pour l'afficher dans la console.
@@ -176,12 +188,13 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
       trips,
       creerVoyage,
       modifierVoyage,
+      changerCouverture,
       supprimerVoyage,
       obtenirVoyage,
       ajouterSouvenir,
       supprimerSouvenir,
     }),
-    [trips, creerVoyage, modifierVoyage, supprimerVoyage, obtenirVoyage, ajouterSouvenir, supprimerSouvenir],
+    [trips, creerVoyage, modifierVoyage, changerCouverture, supprimerVoyage, obtenirVoyage, ajouterSouvenir, supprimerSouvenir],
   );
 
   return (
@@ -228,5 +241,6 @@ function versVoyage(trip: Trip, memories: Memory[]): Voyage {
     }),
     photoCount: memories.length,
     souvenirs: memories.map(versSouvenir),
+    cheminCouverture: trip.coverPhotoPath ?? null,
   };
 }

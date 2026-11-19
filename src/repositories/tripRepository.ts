@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   onSnapshot,
   orderBy,
@@ -59,24 +60,46 @@ export function createTrip(uid: string, input: NewTrip): string {
   setDoc(ref, {
     ...input,
     coverMemoryId: null,
+    coverPhotoPath: null, // pas d'icône à la création : elle se choisit dans l'écran de modification
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   }).catch(logError('createTrip'));
   return ref.id;
 }
 
-type TripChanges = Partial<NewTrip> & { coverMemoryId?: string | null };
+type TripChanges = Partial<NewTrip> & {
+  coverMemoryId?: string | null;
+  coverPhotoPath?: string | null;
+};
 
 export function updateTrip(uid: string, tripId: string, changes: TripChanges): void {
   updateDoc(tripDoc(uid, tripId), { ...changes, updatedAt: serverTimestamp() })
     .catch(logError('updateTrip'));
 }
 
+// Change l'icône du voyage, puis efface le fichier de l'ancienne icône.
+// Comme pour deleteTrip, le fichier n'est effacé qu'une fois l'écriture Firestore réussie :
+// si elle échoue, le voyage pointe toujours vers l'ancienne image, qui doit donc rester.
+export function setTripCover(
+  uid: string,
+  tripId: string,
+  coverPhotoPath: string,
+  previousCoverPhotoPath: string | null,
+): void {
+  updateDoc(tripDoc(uid, tripId), { coverPhotoPath, updatedAt: serverTimestamp() })
+    .then(() => {
+      if (previousCoverPhotoPath) deletePhoto(previousCoverPhotoPath);
+    })
+    .catch(logError('setTripCover'));
+}
+
 // Supprime le voyage AVEC ses étapes, ses souvenirs et les fichiers photo.
 // Firestore ne supprime pas les sous-collections tout seul.
 export async function deleteTrip(uid: string, tripId: string): Promise<void> {
   const tripRef = tripDoc(uid, tripId);
-  const [steps, memories] = await Promise.all([
+  // On lit aussi le voyage lui-même pour connaître le fichier de son icône avant de l'effacer.
+  const [trip, steps, memories] = await Promise.all([
+    getDoc(tripRef),
     getDocs(collection(tripRef, 'steps')),
     getDocs(collection(tripRef, 'memories')),
   ]);
@@ -89,4 +112,7 @@ export async function deleteTrip(uid: string, tripId: string): Promise<void> {
 
   // Les fichiers ne sont effacés qu'une fois la suppression Firestore réussie.
   memories.forEach((d) => deletePhoto(d.data().localPhotoPath));
+  // data() n'est pas typé : typeof vérifie que l'icône existe vraiment (anciens voyages : champ absent).
+  const coverPhotoPath = trip.data()?.coverPhotoPath;
+  if (typeof coverPhotoPath === 'string') deletePhoto(coverPhotoPath);
 }

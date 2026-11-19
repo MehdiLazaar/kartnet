@@ -85,7 +85,7 @@ service cloud.firestore {
       return d.keys().hasAll(['title', 'startDate', 'createdAt', 'updatedAt'])
         && d.keys().hasOnly([
           'title', 'destination', 'description', 'startDate', 'endDate', 'coverMemoryId',
-          'createdAt', 'updatedAt'
+          'coverPhotoPath', 'createdAt', 'updatedAt'
         ])
         && isText(d.title, 1, 80)
         && isOptionalText(d.get('destination', null), 100)
@@ -93,7 +93,9 @@ service cloud.firestore {
         && d.startDate is timestamp
         && isOptionalTimestamp(endDate)
         && (endDate == null || endDate >= d.startDate)
-        && isOptionalText(d.get('coverMemoryId', null), 128);
+        && isOptionalText(d.get('coverMemoryId', null), 128)
+        // Facultatif (absent des anciens voyages) : null ou un chemin local, même limite que localPhotoPath.
+        && isOptionalText(d.get('coverPhotoPath', null), 512);
     }
 
     function isValidStep() {
