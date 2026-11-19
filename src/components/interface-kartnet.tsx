@@ -1,11 +1,14 @@
 import { CouleursMarque as C } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
 import type { Voyage } from '@/features/voyages/contexte-voyages';
+import { getPhotoUri } from '@/repositories/photoStorage';
+import { Image } from 'expo-image';
 import type { Href } from 'expo-router';
 import { Link, router } from 'expo-router';
 import { PropsWithChildren } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 export function Ecran({ children }: PropsWithChildren) {
   return (
@@ -52,7 +55,19 @@ export function CarteVoyage({ trip }: { trip: Voyage }) {
   return (
     <Link href={{ pathname: '/voyage/[id]', params: { id: trip.id } }} asChild>
       <Pressable style={({ pressed }) => [styles.tripCard, pressed && styles.pressed]}>
-        <View style={styles.tripIcon}><Text style={styles.tripIconText}>⌖</Text></View>
+        {/* L'icône choisie dans l'écran de modification, sinon le ⌖ par défaut */}
+        {trip.cheminCouverture ? (
+          <Image
+            source={{ uri: getPhotoUri(trip.cheminCouverture) }}
+            contentFit="cover"
+            style={styles.tripIcon}
+            accessibilityIgnoresInvertColors
+          />
+        ) : (
+          <View style={styles.tripIcon}>
+            <Text style={styles.tripIconText}>⌖</Text>
+          </View>
+        )}
         <View style={styles.tripInfo}>
           <Text style={styles.tripDestination}>{trip.destination}</Text>
           <Text style={styles.tripTitle}>{trip.title}</Text>

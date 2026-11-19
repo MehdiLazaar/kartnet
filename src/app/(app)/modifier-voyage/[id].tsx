@@ -1,13 +1,17 @@
-import { router, useLocalSearchParams } from 'expo-router';
-
 import { FormulaireVoyage } from '@/components/formulaire-voyage';
 import { Ecran, EnteteEcran, TitreEcran } from '@/components/interface-kartnet';
+import { CouleursMarque as C } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
+import { choisirImageCouverture } from '@/features/photos/choisir-image-couverture';
 import { useVoyages } from '@/features/voyages/contexte-voyages';
+import { getPhotoUri } from '@/repositories/photoStorage';
+import { Image } from 'expo-image';
+import { router, useLocalSearchParams } from 'expo-router';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function EcranModificationVoyage() {
     const { id } = useLocalSearchParams<{ id: string }>();
-    const { obtenirVoyage, modifierVoyage } = useVoyages();
+    const { obtenirVoyage, modifierVoyage, changerCouverture } = useVoyages();
     const voyage = obtenirVoyage(id);
 
     // Mauvais id (ou voyage supprimé) : on affiche un message au lieu de planter.
@@ -26,6 +30,20 @@ export default function EcranModificationVoyage() {
         router.back(); //on retire l'écran du dessus, retour sur la page du voyage
     };
 
+    // Choisit une image dans la galerie et l'enregistre tout de suite comme icône du voyage.
+    const changerIcone = async () => {
+        try {
+            const chemin = await choisirImageCouverture();
+            //si le chemin est null donc le user a arreter, on stop la fonction
+            if (!chemin) return;
+            //enregistre l'icône avec changerCouverture
+            changerCouverture(voyage.id, chemin);
+        } catch {
+            Alert.alert(Textes.modifierVoyage.libelleIcone, Textes.modifierVoyage.erreurIcone);
+        }
+    };
+
+
     // Le texte de remplacement n'est pas une vraie destination : champ vide.
     const destinationActuelle =
         voyage.destination === Textes.voyage.destinationParDefaut ? '' : voyage.destination;
@@ -38,6 +56,32 @@ export default function EcranModificationVoyage() {
                 title={Textes.modifierVoyage.titre}
                 subtitle={Textes.modifierVoyage.sousTitre}
             />
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={Textes.modifierVoyage.libelleAccessibiliteIcone}
+                onPress={changerIcone}
+                style={({ pressed }) => [styles.blocIcone, pressed && styles.appuye]}
+            >
+                {voyage.cheminCouverture ? (
+                    <Image
+                        source={{ uri: getPhotoUri(voyage.cheminCouverture) }}
+                        contentFit="cover"
+                style={styles.icone}
+                accessibilityIgnoresInvertColors
+                    />
+                ) : (
+                <View style={[styles.icone, styles.iconeVide]}>
+                    <Text style={styles.iconeGlyphe}>⌖</Text>
+                </View>
+                )}
+
+                <View style={styles.texteIcone}>
+                    <Text style={styles.libelleIcone}>{Textes.modifierVoyage.libelleIcone}</Text>
+                    <Text style={styles.aideIcone}>{Textes.modifierVoyage.aideIcone}</Text>
+                </View>
+
+            </Pressable>
+
             <FormulaireVoyage
                 titreInitial={voyage.title}
                 destinationInitiale={destinationActuelle}
@@ -47,3 +91,20 @@ export default function EcranModificationVoyage() {
         </Ecran>
     );
 }
+
+const styles = StyleSheet.create({
+    // le bloc entier : l'icône à gauche, les textes à droite
+    blocIcone: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 22 },
+    // le carré de l'icône (image ou ⌖) : mêmes dimensions que tripIcon des cartes de voyage
+    icone: { width: 70, height: 70, borderRadius: 18 },
+    // ajouté au carré quand il n'y a pas d'image : fond coloré + ⌖ centré
+    iconeVide: { backgroundColor: C.mapTint, alignItems: 'center', justifyContent: 'center' },
+    iconeGlyphe: { color: C.ocean, fontSize: 26 },
+    // la colonne des deux textes prend toute la place restante
+    texteIcone: { flex: 1 },
+    libelleIcone: { color: C.ink, fontSize: 13, fontWeight: '700' },
+    aideIcone: { color: C.muted, fontSize: 12, marginTop: 4 },
+    // retour visuel pendant l'appui
+    appuye: { opacity: 0.8 },
+});
+

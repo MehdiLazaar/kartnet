@@ -9,7 +9,7 @@ export async function choisirPhotosGalerie(): Promise<ImagePicker.ImagePickerAss
   const resultat = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],
     allowsMultipleSelection: true,
-    selectionLimit: 10,
+    selectionLimit: 5,
     quality: 0.9,
     exif: true,
   });

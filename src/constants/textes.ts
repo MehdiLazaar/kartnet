@@ -78,6 +78,11 @@ export const Textes = {
     titre: 'Modifier le voyage',
     sousTitre: 'Change le nom ou la destination de ton carnet.',
     bouton: 'Enregistrer',
+    libelleIcone: 'Icône du voyage',
+    aideIcone: 'Touche pour choisir une image',
+    libelleAccessibiliteIcone: 'Changer l’icône du voyage',
+    erreurIcone: 'L’image n’a pas pu être enregistrée. Réessaie.',
+
   },
   voyage: {
     titreSectionPhotos: 'LES SOUVENIRS EN IMAGES',
