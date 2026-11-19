@@ -41,7 +41,7 @@ export default function EcranDetailVoyage() {
 
   const voyageId = voyage.id;
 
-  // Supprimer le voyage entier (bouton en bas de la page).
+  // Supprime le voyage entier.
   const confirmerSuppressionVoyage = () => {
     Alert.alert(
       Textes.voyage.titreSuppression,
@@ -51,16 +51,17 @@ export default function EcranDetailVoyage() {
         {
           text: Textes.voyage.confirmerSuppression,
           style: "destructive",
+          //On quitte la page puis apres on suppr le voyage dans firebase
           onPress: () => {
-            router.back(); // on quitte d'abord la page
-            supprimerVoyage(voyageId); // puis on supprime le voyage dans Firestore
+            router.back();
+            supprimerVoyage(voyageId); 
           },
         },
       ],
     );
   };
 
-  // Supprimer une seule photo (la croix) : retire la fiche du carnet, le fichier reste sur l’appareil.
+  // Supprimer une seule photo retire la fiche du carnet, le fichier reste sur l’appareil.
   const confirmerSuppressionPhoto = (idSouvenir: string) => {
     Alert.alert(
       Textes.photos.titreSuppression,

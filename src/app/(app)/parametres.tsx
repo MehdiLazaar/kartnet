@@ -4,9 +4,8 @@ import { Ecran, EnteteEcran, TitreEcran } from '@/components/interface-kartnet';
 import { CouleursMarque as C, PoliceEtiquette } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
 
-// Affichage indicatif : les autorisations appartiennent au système (iOS/Android).
-// L'app peut les demander, mais seul l'utilisateur peut les changer, dans les Réglages du téléphone.
-// Il n'y a donc volontairement aucun interrupteur ici.
+//Affichage que indicatif on peut pas gérer les autorisatiosn 
+//L'app peut les demander, mais seul l'utilisateur peut les changer, dans les Réglages du téléphone.
 const AUTORISATIONS = [
   { titre: Textes.parametres.titreCamera, description: Textes.parametres.descriptionCamera },
   { titre: Textes.parametres.titreLocalisation, description: Textes.parametres.descriptionLocalisation },

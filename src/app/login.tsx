@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { router } from 'expo-router';
+import { useState } from 'react';
 
 import { AuthLayout } from '@/components/auth-layout';
 import { FormError } from '@/components/ui/form-error';
@@ -11,7 +11,7 @@ import { authErrorMessage, signIn } from '@/repositories/authRepository';
 
 const T = Textes.connexion;
 
-// Écran de connexion, aux couleurs de la charte Kartnet.
+// Écran de connexion
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,8 +29,8 @@ export default function LoginScreen() {
       setError(T.erreurChampsVides);
       return;
     }
-    // `void` : on lance la promesse sans l'attendre, volontairement.
-    // Les erreurs sont déjà gérées dans useFormSubmit (try / catch).
+    //void qui fais qu'on lance la promesse sans l'attendre
+    // Les erreurs sont déjà gérées dans useFormSubmit avec u n trycatch
     void submit();
   }
 

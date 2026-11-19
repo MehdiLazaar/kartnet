@@ -43,7 +43,7 @@ export default function EcranAjoutPhotos() {
       return;
     }
 
-    // L'identifiant transmis permet à l'écran caméra de classer la photo dans ce voyage.
+    // L'identifiant transmis permet à l'écran caméra de classer la photo dans le voyage
     router.push({ pathname: "/appareil-photo/[id]", params: { id: trip.id } });
   }
 

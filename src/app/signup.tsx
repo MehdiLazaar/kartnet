@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { router } from 'expo-router';
+import { useState } from 'react';
 
 import { AuthLayout } from '@/components/auth-layout';
 import { FormError } from '@/components/ui/form-error';
@@ -11,13 +11,13 @@ import { authErrorMessage, signUp } from '@/repositories/authRepository';
 
 const T = Textes.inscription;
 
-// Écran d'inscription, aux couleurs de la charte Kartnet.
+//Écran d'inscription
 export default function SignupScreen() {
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Crée le compte (Authentication) ET le profil users/{uid} (Firestore).
+  //Créer le compte  dans firebase.
   const { submit, submitting, error, setError } = useFormSubmit(
     async () => {
       await signUp(email, password, displayName);
@@ -31,8 +31,6 @@ export default function SignupScreen() {
       setError(T.erreurChampsVides);
       return;
     }
-    // `void` : on lance la promesse sans l'attendre, volontairement.
-    // Les erreurs sont déjà gérées dans useFormSubmit (try / catch).
     void submit();
   }
 

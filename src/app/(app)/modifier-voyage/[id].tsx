@@ -15,7 +15,8 @@ export default function EcranModificationVoyage() {
     const { obtenirVoyage, modifierVoyage, changerCouverture } = useVoyages();
     const voyage = obtenirVoyage(id);
 
-    // Mauvais id (ou voyage supprimé) : on affiche un message au lieu de planter.
+    //Narrowing, si Mauvais id (ou voyage supprimé) on affiche un message au lieu de planter e
+    //on continue pas
     if (!voyage) {
         return (
             <Ecran>
@@ -25,19 +26,21 @@ export default function EcranModificationVoyage() {
         );
     }
 
-    // Fonction fléchée déclarée APRÈS le if : TypeScript sait que voyage existe.
+    // Fonction fléchée déclarée APRÈS le if du coup TypeScript sait que voyage existe.
     const handleSave = (title: string, destination: string) => {
-        modifierVoyage(voyage.id, title, destination); // enregistre dans Firestore
-        router.back(); //on retire l'écran du dessus, retour sur la page du voyage
+         // enregistre dans Firestore
+        modifierVoyage(voyage.id, title, destination);
+         //Retire l'écran du dessus du coup on retourne sur la page du voyag
+        router.back();
     };
 
-    // Choisit une image dans la galerie et l'enregistre tout de suite comme icône du voyage.
+    //Appel la fonction pour choisir l'image icon du voyage dans la galerie
     const changerIcone = async () => {
         try {
             const chemin = await choisirImageCouverture();
             //si le chemin est null donc le user a arreter, on stop la fonction
             if (!chemin) return;
-            //enregistre l'icône avec changerCouverture
+            //enregistre l'icône avec changerCouverture pas besoin de supprimer l'ancienne ca la remplaces
             changerCouverture(voyage.id, chemin);
         } catch {
             Alert.alert(Textes.modifierVoyage.libelleIcone, Textes.modifierVoyage.erreurIcone);
