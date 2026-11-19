@@ -17,5 +17,5 @@ export function FormError({ message }: Readonly<{ message: string | null }>) {
 
 const styles = StyleSheet.create({
   box: { backgroundColor: C.captionTint, borderRadius: 12, paddingHorizontal: 13, paddingVertical: 10 },
-  text: { color: '#B84E3D', fontSize: 13, lineHeight: 18 },
+  text: { color: C.coralDeep, fontSize: 13, lineHeight: 18 },
 });

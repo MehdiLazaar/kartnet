@@ -3,7 +3,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CarteVoyage } from '@/components/interface-kartnet';
-import { CouleursMarque as C } from '@/constants/identite-visuelle';
+import { SymboleKartnet } from '@/components/marque-kartnet';
+import { CouleursMarque as C, PoliceTitre } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
 import { useVoyages } from '@/features/voyages/contexte-voyages';
 
@@ -15,7 +16,7 @@ export default function EcranAccueil() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.topBar}>
           <View style={styles.brand}>
-            <View style={styles.brandMark}><View style={styles.brandLens} /></View>
+            <SymboleKartnet taille={42} />
             <Text style={styles.brandName}>{Textes.nomMarque}</Text>
           </View>
           <Pressable
@@ -67,14 +68,12 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: C.cream },
   content: { width: '100%', maxWidth: 600, alignSelf: 'center', paddingHorizontal: 22, paddingBottom: 30 },
   topBar: { height: 62, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  brand: { flexDirection: 'row', alignItems: 'center', gap: 11 },
-  brandMark: { width: 40, height: 40, borderRadius: 20, backgroundColor: C.coral, alignItems: 'center', justifyContent: 'center' },
-  brandLens: { width: 16, height: 16, borderRadius: 8, borderWidth: 2.5, borderColor: C.paper },
-  brandName: { color: C.ink, fontSize: 27, fontWeight: '800', letterSpacing: -1 },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  brandName: { color: C.ink, fontSize: 28, ...PoliceTitre },
   avatar: { width: 34, height: 34, borderRadius: 18, backgroundColor: C.avatar, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: C.ink, fontSize: 13, fontWeight: '700' },
   intro: { paddingTop: 12, paddingBottom: 24 },
-  title: { color: C.ink, fontSize: 35, lineHeight: 40, fontWeight: '700', letterSpacing: -1.1, fontFamily: 'Georgia' },
+  title: { color: C.ink, fontSize: 35, lineHeight: 40, ...PoliceTitre },
   subtitle: { color: C.muted, fontSize: 14, marginTop: 9 },
   tripSection: { marginBottom: 7 },
   sectionTitle: { color: C.ink, fontSize: 16, fontWeight: '700', marginBottom: 11 },

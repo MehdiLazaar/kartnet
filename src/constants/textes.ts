@@ -1,6 +1,6 @@
 /** Textes affichés par l’application, regroupés par écran. */
 export const Textes = {
-  nomMarque: 'kartnet',
+  nomMarque: 'Kartnet', // charte : toujours K majuscule
   connexion: {
     surtitre: 'BON RETOUR',
     titre: 'Content de te revoir',
