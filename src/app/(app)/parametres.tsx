@@ -1,32 +1,32 @@
-import { useState } from 'react';
-import { StyleSheet, Switch, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Ecran, EnteteEcran, TitreEcran } from '@/components/interface-kartnet';
-import { CouleursMarque as C } from '@/constants/identite-visuelle';
+import { CouleursMarque as C, PoliceEtiquette } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
 
-function SettingToggle({ title, description, value, onValueChange }: { title: string; description: string; value: boolean; onValueChange: (value: boolean) => void }) {
-  return (
-    <View style={styles.settingRow}>
-      <View style={styles.texteReglage}><Text style={styles.settingTitle}>{title}</Text><Text style={styles.settingDescription}>{description}</Text></View>
-      <Switch value={value} onValueChange={onValueChange} trackColor={{ false: C.line, true: C.ocean }} thumbColor={C.paper} accessibilityLabel={title} />
-    </View>
-  );
-}
+//Affichage que indicatif on peut pas gérer les autorisatiosn 
+//L'app peut les demander, mais seul l'utilisateur peut les changer, dans les Réglages du téléphone.
+const AUTORISATIONS = [
+  { titre: Textes.parametres.titreCamera, description: Textes.parametres.descriptionCamera },
+  { titre: Textes.parametres.titreLocalisation, description: Textes.parametres.descriptionLocalisation },
+  { titre: Textes.parametres.titreGalerie, description: Textes.parametres.descriptionGalerie },
+];
 
 export default function EcranParametres() {
-  const [usePhotoLocation, setUsePhotoLocation] = useState(true);
-  const [reminders, setReminders] = useState(false);
-
   return (
     <Ecran>
       <EnteteEcran back="/profil" />
       <TitreEcran eyebrow={Textes.parametres.surtitre} title={Textes.parametres.titre} subtitle={Textes.parametres.sousTitre} />
+      <Text style={styles.section}>{Textes.parametres.titreAutorisations}</Text>
       <View style={styles.panel}>
-        <SettingToggle title={Textes.parametres.titreLocalisation} description={Textes.parametres.descriptionLocalisation} value={usePhotoLocation} onValueChange={setUsePhotoLocation} />
-        <View style={styles.divider} />
-        <SettingToggle title={Textes.parametres.titreNotifications} description={Textes.parametres.descriptionNotifications} value={reminders} onValueChange={setReminders} />
+        {AUTORISATIONS.map((autorisation, index) => (
+          <View key={autorisation.titre} style={[styles.ligne, index > 0 && styles.ligneSeparee]}>
+            <Text style={styles.titreLigne}>{autorisation.titre}</Text>
+            <Text style={styles.descriptionLigne}>{autorisation.description}</Text>
+          </View>
+        ))}
       </View>
+      <Text style={styles.note}>{Textes.parametres.noteReglages}</Text>
       <View style={styles.infoCard}><Text style={styles.infoTitle}>{Textes.parametres.titreConfidentialite}</Text><Text style={styles.infoBody}>{Textes.parametres.descriptionConfidentialite}</Text></View>
       <View style={styles.infoCard}><Text style={styles.infoTitle}>{Textes.parametres.titreAPropos}</Text><Text style={styles.infoBody}>{Textes.parametres.descriptionAPropos}</Text></View>
     </Ecran>
@@ -34,13 +34,15 @@ export default function EcranParametres() {
 }
 
 const styles = StyleSheet.create({
-  panel: { borderRadius: 18, backgroundColor: C.paper, paddingHorizontal: 15 },
-  settingRow: { minHeight: 84, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },
-  texteReglage: { flex: 1 },
-  settingTitle: { color: C.ink, fontSize: 13, fontWeight: '700' },
-  settingDescription: { color: C.muted, fontSize: 10, lineHeight: 15, marginTop: 5 },
-  divider: { height: StyleSheet.hairlineWidth, backgroundColor: C.line },
-  infoCard: { borderRadius: 17, backgroundColor: C.mapTint, padding: 15, marginTop: 14 },
+  section: { color: C.ocean, fontSize: 10, marginBottom: 10, ...PoliceEtiquette },
+  // Charte « Carte au trésor » : boîte de dialogue à coins presque droits et cadre d'encre de 2 px.
+  panel: { borderRadius: 6, borderWidth: 2, borderColor: C.cadre, backgroundColor: C.paper, paddingHorizontal: 15 },
+  ligne: { paddingVertical: 14 },
+  ligneSeparee: { borderTopWidth: 1, borderTopColor: C.line },
+  titreLigne: { color: C.ink, fontSize: 14, fontWeight: '700' },
+  descriptionLigne: { color: C.muted, fontSize: 12, lineHeight: 17, marginTop: 4 },
+  note: { color: C.muted, fontSize: 12, lineHeight: 17, marginTop: 10 },
+  infoCard: { borderRadius: 6, backgroundColor: C.mapTint, padding: 15, marginTop: 14 },
   infoTitle: { color: C.ocean, fontSize: 13, fontWeight: '700' },
-  infoBody: { color: C.muted, fontSize: 11, lineHeight: 17, marginTop: 6 },
+  infoBody: { color: C.muted, fontSize: 12, lineHeight: 17, marginTop: 6 },
 });
