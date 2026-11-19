@@ -41,7 +41,9 @@ export default function EcranAppareilPhoto() {
       // Le contexte met à jour le carnet et son compteur de photos.
       ajouterSouvenir(voyage.id, souvenir);
 
-      router.replace({ pathname: "/voyage/[id]", params: { id: voyage.id } });
+      // dismissTo retire la caméra et « Ajouter des photos » pour revenir au voyage déjà ouvert,
+      // au lieu d'empiler une seconde copie du voyage.
+      router.dismissTo({ pathname: "/voyage/[id]", params: { id: voyage.id } });
     } catch {
       // La capture, la copie ou l'accès à la caméra peut échouer sur l'appareil.
       Alert.alert(Textes.camera.titre, Textes.camera.erreurCapture);

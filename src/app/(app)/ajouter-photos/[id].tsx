@@ -108,7 +108,7 @@ export default function EcranAjoutPhotos() {
         <BoutonPrincipal
           label={Textes.photos.boutonRetourVoyage}
           onPress={() =>
-            router.replace({
+            router.dismissTo({
               pathname: "/voyage/[id]",
               params: { id: trip.id },
             })
