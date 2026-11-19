@@ -3,7 +3,7 @@ import {
   EnteteEcran,
   TitreEcran
 } from "@/components/interface-kartnet";
-import { CouleursMarque as C } from "@/constants/identite-visuelle";
+import { CouleursMarque as C, PoliceEtiquette, PoliceTitre } from "@/constants/identite-visuelle";
 import { Textes } from "@/constants/textes";
 import { useVoyages } from "@/features/voyages/contexte-voyages";
 import { getPhotoUri } from "@/repositories/photoStorage";
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
   arrow: { color: C.coral, fontSize: 20 },
   boutonSupprimerVoyage: { alignItems: "center", marginTop: 20, paddingVertical: 12 },
   texteSupprimerVoyage: { color: C.coralDeep, fontSize: 13, fontWeight: "700" },
-  boutonModifier: { width: 38, height: 38, borderRadius: 13, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' },
+  boutonModifier: { width: 38, height: 38, borderRadius: 6, borderWidth: 2, borderColor: C.cadre, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' },
   texteModifier: { color: C.ink, fontSize: 18 },
 });
 
