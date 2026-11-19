@@ -84,7 +84,7 @@ export function FormulaireVoyage({
 const styles = StyleSheet.create({
     field: { marginBottom: 19 },
     label: { color: C.ink, fontSize: 13, fontWeight: '700', marginBottom: 8 },
-    input: { minHeight: 54, borderRadius: 15, borderWidth: 1, borderColor: C.line, backgroundColor: C.paper, paddingHorizontal: 15, color: C.ink, fontSize: 15 },
+    input: { minHeight: 54, borderRadius: 6, borderWidth: 2, borderColor: C.line, backgroundColor: C.paper, paddingHorizontal: 15, color: C.ink, fontSize: 15 },
     error: { color: C.coralDeep, fontSize: 12, marginTop: -8, marginBottom: 12 },
     formNote: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.mapTint, borderRadius: 14, padding: 14, marginTop: 3, marginBottom: 23, gap: 10 },
     noteIcon: { color: C.ocean, fontSize: 17 },

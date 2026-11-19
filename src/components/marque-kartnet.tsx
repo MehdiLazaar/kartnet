@@ -1,43 +1,63 @@
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Rect } from 'react-native-svg';
 
 import { CouleursMarque as C } from '@/constants/identite-visuelle';
 
-// Éléments graphiques de la charte Kartnet, redessinés en SVG à partir des fichiers du design system.
+// Éléments graphiques de la charte « Carte au trésor », dessinés en pixel art avec react-native-svg.
+// Chaque dessin est une grille : une lettre = un pixel d'une couleur, un point = un pixel vide.
 
-/** Symbole du logo (piste A « épingle-objectif ») : une épingle de carte dont la tête est un objectif. */
+/** L'épingle-objectif sur une grille de 12 × 16 : P épingle, R bague, L lentille, G reflet. */
+const EPINGLE = [
+  '....PPPP....',
+  '..PPPPPPPP..',
+  '.PPPRRRRPPP.',
+  '.PPRRLLRRPP.',
+  'PPRRLGLLRRPP',
+  'PPRRLLLLRRPP',
+  'PPRRLLLLRRPP',
+  '.PPRRLLRRPP.',
+  '.PPPRRRRPPP.',
+  '..PPPPPPPP..',
+  '..PPPPPPPP..',
+  '...PPPPPP...',
+  '....PPPP....',
+  '....PPPP....',
+  '.....PP.....',
+  '.....PP.....',
+];
+
+/** Transforme une grille de lettres en carrés SVG colorés. */
+function Pixels({ grille, couleurs }: Readonly<{ grille: string[]; couleurs: Record<string, string> }>) {
+  return grille.flatMap((ligne, y) =>
+    [...ligne].map((lettre, x) =>
+      couleurs[lettre] ? (
+        // 1.02 au lieu de 1 : évite les fines lignes vides entre deux pixels voisins.
+        <Rect key={`${x}-${y}`} x={x} y={y} width={1.02} height={1.02} fill={couleurs[lettre]} />
+      ) : null,
+    ),
+  );
+}
+
+/** Symbole du logo : l'épingle-objectif en pixel art. `taille` = hauteur en points. */
 export function SymboleKartnet({ taille = 40 }: Readonly<{ taille?: number }>) {
-  // Le symbole est plus haut que large (ratio de l'épingle d'origine : 80 × 126).
   return (
-    <Svg width={(taille * 80) / 126} height={taille} viewBox="20 18 80 126" accessibilityElementsHidden>
-      <Path d="M60 142C39 113.5 22 80.8 22 58A38 38 0 1 1 98 58C98 80.8 81 113.5 60 142Z" fill={C.coral} />
-      <Circle cx={60} cy={58} r={22} fill={C.ink} />
-      <Circle cx={60} cy={58} r={12} fill={C.ocean} />
-      <Circle cx={55} cy={53} r={4.5} fill={C.cream} />
+    <Svg width={(taille * 12) / 16} height={taille} viewBox="0 0 12 16" accessibilityElementsHidden>
+      <Pixels grille={EPINGLE} couleurs={{ P: C.coral, R: C.ink, L: C.ocean, G: C.paper }} />
     </Svg>
   );
 }
 
 /**
- * Motif de la charte : un trajet en pointillés qui relie des épingles.
+ * Motif de la charte : un trajet en escalier de pixels qui relie trois épingles.
  * Décoratif uniquement (jamais derrière du texte) : il s'étire sur toute la largeur.
  */
 export function MotifParcours() {
-  // aspectRatio garde les proportions du dessin : les épingles restent rondes quelle que soit la largeur.
+  const pas = [[2, 9], [6, 9], [10, 8], [14, 7], [18, 7], [22, 8], [26, 6], [30, 5], [34, 5], [38, 4], [42, 3], [46, 3], [50, 2], [54, 2], [58, 1]];
+  const epingles = [[0, 8], [24, 5], [60, 0]];
+  // aspectRatio garde les proportions : les pixels restent carrés quelle que soit la largeur.
   return (
-    <Svg style={{ width: '100%', aspectRatio: 800 / 120 }} viewBox="0 0 800 120" accessibilityElementsHidden>
-      <Path
-        d="M20 96C120 40 180 100 270 70S400 20 480 52 610 104 680 60 740 24 780 22"
-        stroke={C.ocean}
-        strokeWidth={3}
-        strokeDasharray="12 10"
-        strokeLinecap="round"
-        fill="none"
-      />
-      <Circle cx={20} cy={96} r={9} fill={C.coral} />
-      <Circle cx={270} cy={70} r={9} fill={C.coral} />
-      <Circle cx={480} cy={52} r={9} fill={C.coral} />
-      <Circle cx={780} cy={22} r={13} fill={C.coral} />
-      <Circle cx={780} cy={22} r={4.5} fill={C.cream} />
+    <Svg style={{ width: '100%', aspectRatio: 64 / 11 }} viewBox="0 0 64 11" accessibilityElementsHidden>
+      {pas.map(([x, y]) => <Rect key={`t${x}`} x={x} y={y} width={2} height={1} fill={C.ink} />)}
+      {epingles.map(([x, y]) => <Rect key={`e${x}`} x={x} y={y} width={3} height={3} fill={C.coral} />)}
     </Svg>
   );
 }
