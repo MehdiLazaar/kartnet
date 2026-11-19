@@ -9,7 +9,7 @@ import {
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { CouleursMarque as C } from '@/constants/identite-visuelle';
+import { CouleursMarque as C, PoliceEtiquette } from '@/constants/identite-visuelle';
 import { Textes } from '@/constants/textes';
 import { logOut } from '@/repositories/authRepository';
 
@@ -80,8 +80,8 @@ const styles = StyleSheet.create({
   contenu: { flex: 1 },
   barreSecurisee: {
     backgroundColor: C.paper,
-    borderTopColor: C.line,
-    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: C.cadre,
+    borderTopWidth: 2,
   },
   barre: {
     minHeight: 62,
@@ -97,8 +97,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  texteOnglet: { color: C.muted, fontSize: 13, fontWeight: '600' },
-  texteOngletActif: { color: C.ocean, fontWeight: '800' },
+  // Onglets en Silkscreen, comme les entrées d'un menu de jeu. Pas de fontWeight : une seule graisse.
+  texteOnglet: { color: C.muted, fontSize: 12, textTransform: 'uppercase', ...PoliceEtiquette },
+  texteOngletActif: { color: C.ocean },
   boutonDeconnexion: {
     minHeight: 42,
     alignItems: 'center',

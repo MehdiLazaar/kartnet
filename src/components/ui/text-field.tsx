@@ -27,10 +27,10 @@ const styles = StyleSheet.create({
   label: { color: C.ink, fontSize: 13, fontWeight: '700' },
   input: {
     minHeight: 54,
-    borderRadius: 15,
-    borderWidth: 1,
+    borderRadius: 6,
+    borderWidth: 2,
     borderColor: C.line,
-    backgroundColor: C.cream,
+    backgroundColor: C.paper,
     paddingHorizontal: 15,
     color: C.ink,
     fontSize: 15,

@@ -101,7 +101,8 @@ const styles = StyleSheet.create({
   eyebrow: { color: C.ocean, fontSize: 10, letterSpacing: 1.4, fontWeight: '800', marginBottom: 8 },
   title: { color: C.ink, fontSize: 30, lineHeight: 36, ...PoliceTitre },
   subtitle: { color: C.muted, fontSize: 14, lineHeight: 21, marginTop: 8 },
-  primaryButton: { minHeight: 54, paddingHorizontal: 17, borderRadius: 16, backgroundColor: C.coral, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  // Bouton de menu de RPG : cadre de 2 px et bord inférieur plus épais (ombre dure, identique iOS/Android).
+  primaryButton: { minHeight: 54, paddingHorizontal: 17, borderRadius: 6, borderWidth: 2, borderBottomWidth: 4, borderColor: C.cadre, backgroundColor: C.coral, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   primaryText: { color: C.paper, fontSize: 15, fontWeight: '700' },
   arrow: { color: C.paper, fontSize: 21, fontWeight: '600' },
   pressed: { opacity: 0.8 },

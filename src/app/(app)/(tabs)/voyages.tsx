@@ -48,8 +48,9 @@ const styles = StyleSheet.create({
   summary: { flexDirection: 'row', alignItems: 'center', marginBottom: 14, gap: 8 },
   summaryNumber: { color: C.ink, fontSize: 14, fontWeight: '800' },
   summaryLabel: { color: C.muted, fontSize: 12 },
-  summaryDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: C.sand, marginHorizontal: 2 },
+  // Petit carré doré (un « pixel de trésor ») entre les deux compteurs.
+  summaryDot: { width: 5, height: 5, backgroundColor: C.sand, marginHorizontal: 2 },
   empty: { color: C.muted, textAlign: 'center', paddingVertical: 30 },
-  createLink: { minHeight: 50, borderRadius: 15, borderWidth: 1, borderStyle: 'dashed', borderColor: C.coral, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
+  createLink: { minHeight: 50, borderRadius: 6, borderWidth: 2, borderStyle: 'dashed', borderColor: C.coral, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
   createLinkText: { color: C.coral, fontSize: 14, fontWeight: '700' },
 });

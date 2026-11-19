@@ -1,3 +1,4 @@
+import { useFonts } from "expo-font";
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useColorScheme } from "react-native";
@@ -10,6 +11,15 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  // Polices de la charte « Carte au trésor ». Les clés sont les noms utilisés dans fontFamily.
+  const [policesChargees, erreurPolices] = useFonts({
+    Jersey10: require("../../assets/fonts/Jersey10-Regular.ttf"),
+    Silkscreen: require("../../assets/fonts/Silkscreen-Regular.ttf"),
+  });
+
+  // Tant que les polices chargent, l'écran de démarrage reste affiché (preventAutoHideAsync).
+  // En cas d'erreur, on affiche quand même l'app avec la police système.
+  if (!policesChargees && !erreurPolices) return null;
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
