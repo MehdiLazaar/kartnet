@@ -9,7 +9,7 @@ export async function creerSouvenirDepuisPhoto(
 ): Promise<SouvenirVoyage> {
   const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const datePrise = new Date().toISOString();
-  const [cheminPhoto, position] = await Promise.all([
+  const [cheminPhoto, localisation] = await Promise.all([
     savePhoto(photoUri, id),
     obtenirPositionActuelle(),
   ]);
@@ -18,26 +18,38 @@ export async function creerSouvenirDepuisPhoto(
     id,
     cheminPhoto,
     datePrise,
-    position,
+    position: localisation?.position ?? null,
+    placeName: localisation?.placeName ?? null,
   };
 }
 
 // La géolocalisation est facultative : son indisponibilité ne bloque pas le souvenir.
 async function obtenirPositionActuelle(): Promise<{
-  latitude: number;
-  longitude: number;
+  position: { latitude: number; longitude: number };
+  placeName: string | null;
 } | null> {
   try {
     const autorisation = await Location.requestForegroundPermissionsAsync();
     if (!autorisation.granted) return null;
 
-    const position = await Location.getCurrentPositionAsync({
+    const gpsPosition = await Location.getCurrentPositionAsync({
       accuracy: Location.Accuracy.Balanced,
     });
-    return {
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
+    const position = {
+      latitude: gpsPosition.coords.latitude,
+      longitude: gpsPosition.coords.longitude,
     };
+    let placeName: string | null = null;
+    try {
+      const [adresse] = await Location.reverseGeocodeAsync(position);
+      if (adresse) {
+        const ville = adresse.city ?? adresse.subregion ?? adresse.region;
+        placeName = [ville, adresse.country].filter(Boolean).join(', ') || null;
+      }
+    } catch {
+      // Le GPS reste exploitable si le service de géocodage est indisponible.
+    }
+    return { position, placeName };
   } catch {
     return null;
   }

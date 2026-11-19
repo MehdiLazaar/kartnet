@@ -123,6 +123,7 @@ export const Textes = {
     libelleFermerPhoto: 'Fermer l’aperçu de la photo',
     positionAssociee: 'Position enregistrée',
     positionIndisponible: 'Position non disponible',
+    lieuIndisponible: 'Ville et pays non disponibles',
     titreSuppression: 'Supprimer cette photo ?',
     confirmationSuppression: 'La photo sera retirée de ce carnet. Le fichier restera enregistré sur cet appareil.',
     annulerSuppression: 'Annuler',
