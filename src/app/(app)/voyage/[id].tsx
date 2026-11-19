@@ -150,9 +150,9 @@ export default function EcranDetailVoyage() {
                 <Text style={styles.texteSupprimer}>×</Text>
               </Pressable>
               <Text style={styles.legendeSouvenir}>
-                {souvenir.position
-                  ? `${Textes.photos.positionAssociee} · ${souvenir.position.latitude.toFixed(4)}, ${souvenir.position.longitude.toFixed(4)}`
-                  : Textes.photos.positionIndisponible}
+                {souvenir.placeName ?? (souvenir.position
+                  ? Textes.photos.lieuIndisponible
+                  : Textes.photos.positionIndisponible)}
               </Text>
             </View>
           ))}

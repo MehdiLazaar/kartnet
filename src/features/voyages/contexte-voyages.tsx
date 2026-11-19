@@ -29,6 +29,7 @@ export type SouvenirVoyage = {
   cheminPhoto: string;
   datePrise: string;
   position: { latitude: number; longitude: number } | null;
+  placeName: string | null;
 };
 
 type ContexteVoyagesValue = {
@@ -153,7 +154,7 @@ export function FournisseurVoyages({ children }: PropsWithChildren) {
               souvenir.position.longitude,
             )
           : null,
-        placeName: null,
+        placeName: souvenir.placeName,
         stepId: null,
         note: null,
       });
@@ -205,6 +206,7 @@ function versSouvenir(memory: Memory): SouvenirVoyage {
     id: memory.id,
     cheminPhoto: memory.localPhotoPath,
     datePrise: memory.takenAt.toDate().toISOString(),
+    placeName: memory.placeName,
     position: memory.location
       ? {
           latitude: memory.location.latitude,
