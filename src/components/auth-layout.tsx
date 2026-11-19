@@ -66,10 +66,10 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
   },
   brand: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  brandName: { color: C.ink, fontSize: 30, ...PoliceTitre },
+  brandName: { color: C.ink, fontSize: 22, ...PoliceTitre },
   titleBlock: { paddingTop: 34, paddingBottom: 24 },
   eyebrow: { color: C.ocean, fontSize: 10, fontWeight: '800', letterSpacing: 1.7, marginBottom: 9 },
-  title: { color: C.ink, fontSize: 42, lineHeight: 44, ...PoliceTitre },
+  title: { color: C.ink, fontSize: 33, lineHeight: 39, ...PoliceTitre },
   subtitle: { color: C.muted, fontSize: 14, lineHeight: 21, marginTop: 9 },
   card: {
     backgroundColor: C.paper,

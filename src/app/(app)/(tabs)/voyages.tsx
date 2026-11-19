@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   motif: { marginTop: 8 },
   // Le motif occupe déjà l'espace du haut : on resserre le bloc titre.
   titre: { paddingTop: 12 },
-  addButton: { width: 36, height: 36, borderRadius: 6, borderWidth: 2, borderColor: C.cadre, backgroundColor: C.coral, alignItems: 'center', justifyContent: 'center' },
+  addButton: { width: 36, height: 36, borderRadius: 13, backgroundColor: C.coral, alignItems: 'center', justifyContent: 'center' },
   addText: { color: C.paper, fontSize: 23, lineHeight: 25 },
   summary: { flexDirection: 'row', alignItems: 'center', marginBottom: 14, gap: 8 },
   summaryNumber: { color: C.ink, fontSize: 14, fontWeight: '800' },
