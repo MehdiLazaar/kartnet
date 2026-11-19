@@ -1,27 +1,41 @@
+import { BoutonPrincipal, Ecran, EnteteEcran, TitreEcran } from "@/components/interface-kartnet";
+import { CouleursMarque as C } from "@/constants/identite-visuelle";
+import { Textes } from "@/constants/textes";
+import { choisirPhotosGalerie } from '@/features/photos/choisir-photos-galerie';
+import { creerSouvenirDepuisGalerie } from '@/features/photos/creer-souvenir-photo';
+import { useVoyages } from "@/features/voyages/contexte-voyages";
 import { router, useLocalSearchParams } from "expo-router";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
-import {
-  BoutonPrincipal,
-  Ecran,
-  EnteteEcran,
-  TitreEcran,
-} from "@/components/interface-kartnet";
-import { CouleursMarque as C } from "@/constants/identite-visuelle";
-import { Textes } from "@/constants/textes";
-import { useVoyages } from "@/features/voyages/contexte-voyages";
 
 export default function EcranAjoutPhotos() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { obtenirVoyage } = useVoyages();
+  const { obtenirVoyage, ajouterSouvenir } = useVoyages();
   const trip = obtenirVoyage(id);
 
-  function afficherGalerieIndisponible() {
-    Alert.alert(
-      Textes.photos.titreGalerieIndisponible,
-      Textes.photos.texteSelectionIndisponible,
-    );
-  }
+  //async et try catch car des erreurs liés à la galerie, l'espace de stockage ou autre 
+  //ne serait pas visualisables par le user si elles arrivaient. La il vois un message
+  //on fais const ... = async () => au lieu de async fonction pour conserver 
+  //le narrowing de trip. 
+  const importerDepuisGalerie = async () => {
+    //le voyage peut etre undefined si l'id est faux
+    //permet a Typescript de savoir que le voyage existe dans la fonction
+    if (!trip) return;
+    try {
+      const assets = await choisirPhotosGalerie();
+      if (assets.length === 0) return; // l'utilisateur a annulé la galerie
+      // On prépare toutes les photos en meme temps (copies indépendantes),
+      // puis on attend qu'elles soient toutes prêtes avant de les enregistrer.
+      const souvenirs = await Promise.all(assets.map(creerSouvenirDepuisGalerie));
+      souvenirs.forEach((souvenir) => ajouterSouvenir(trip.id, souvenir));
+
+      //revenir au voyage sans créer de copie dans la pile
+      router.dismissTo({ pathname: "/voyage/[id]", params: { id: trip.id } })
+
+    } catch {
+      Alert.alert(Textes.photos.titreErreurImport, Textes.photos.erreurImport);
+    }
+  };
 
   function ouvrirAppareilPhoto() {
     if (!trip) {
@@ -49,7 +63,7 @@ export default function EcranAjoutPhotos() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={Textes.photos.boutonChoisirGalerie}
-          onPress={afficherGalerieIndisponible}
+          onPress={importerDepuisGalerie}
           style={({ pressed }) => [
             styles.actionCard,
             pressed && styles.pressed,
@@ -62,7 +76,7 @@ export default function EcranAjoutPhotos() {
             {Textes.photos.boutonChoisirGalerie}
           </Text>
           <Text style={styles.pickerSubtitle}>
-            {Textes.photos.texteSelectionIndisponible}
+            {Textes.photos.texteGalerie}
           </Text>
         </Pressable>
         <Pressable
@@ -83,7 +97,7 @@ export default function EcranAjoutPhotos() {
           </View>
           <Text style={styles.pickerTitle}>{Textes.photos.boutonCamera}</Text>
           <Text style={styles.pickerSubtitle}>
-            {Textes.photos.texteCameraIndisponible}
+            {Textes.photos.texteCamera}
           </Text>
         </Pressable>
       </View>
